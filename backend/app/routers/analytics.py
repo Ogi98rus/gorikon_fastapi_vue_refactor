@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Form
 from sqlalchemy.orm import Session
 from datetime import datetime, date, timedelta
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 
 from app.models.database import get_db, User
 from app.models.schemas import AnalyticsResponse, GenerationStats
 from app.services.analytics_service import AnalyticsService
 from app.dependencies.auth import get_current_user, get_current_active_user, get_current_superuser, get_client_ip
+from app.services.redis_service import redis_service
 
 router = APIRouter(prefix="/api/analytics", tags=["Аналитика"])
 
@@ -369,3 +370,26 @@ async def track_page_view(
     except Exception as e:
         # Не критично если трекинг не сработал
         return {"success": False, "message": f"Tracking failed: {str(e)}"} 
+
+
+
+@router.get("/redis/stats")
+async def get_redis_stats(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
+    """Получение статистики Redis (только для авторизованных пользователей)"""
+    try:
+        stats = redis_service.get_stats()
+        return {
+            "redis_stats": stats,
+            "redis_available": redis_service.is_available()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка получения статистики Redis: {str(e)}")
+
+@router.post("/redis/clear-rate-limit")
+async def clear_rate_limit(key: str, current_user: User = Depends(get_current_user)) -> Dict[str, str]:
+    """Очистка rate limit для ключа (только для авторизованных пользователей)"""
+    try:
+        redis_service.clear_rate_limit(key)
+        return {"message": f"Rate limit очищен для ключа: {key}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка очистки rate limit: {str(e)}") 

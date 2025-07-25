@@ -12,6 +12,7 @@ import logging
 import traceback
 
 from app.core.config import settings
+from app.services.redis_service import redis_service
 
 logger = logging.getLogger(__name__)
 
@@ -216,21 +217,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return False
 
     def check_rate_limit_with_auth(self, ip: str, path: str, is_authenticated: bool) -> dict:
-        """Проверка лимита запросов с учетом аутентификации"""
+        """Проверка лимита запросов с учетом аутентификации и Redis"""
         try:
-            now = datetime.utcnow()
-            window_start = now - timedelta(minutes=1)
-            
-            # Очищаем старые записи безопасно
-            if ip in self.rate_limits:
-                self.rate_limits[ip] = deque([
-                    timestamp for timestamp in self.rate_limits[ip] 
-                    if timestamp > window_start
-                ])
-            
-            # Проверяем лимит
-            current_requests = len(self.rate_limits[ip]) if ip in self.rate_limits else 0
-            
             # Устанавливаем лимиты в зависимости от аутентификации
             if is_authenticated:
                 # Для зарегистрированных пользователей - очень высокие лимиты
@@ -249,6 +237,90 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 else:
                     limit = 30  # Лимит для остальных API
             
+            # Создаем ключ для Redis
+            redis_key = f"{ip}:{path}"
+            
+            # Пытаемся использовать Redis
+            if redis_service.is_available():
+                # Используем Redis для rate limiting
+                redis_result = redis_service.increment_rate_limit(redis_key, window_minutes=1)
+                
+                if "error" in redis_result:
+                    logger.warning(f"Redis error, falling back to memory: {redis_result['error']}")
+                    return self._fallback_rate_limit(ip, path, is_authenticated, limit)
+                
+                current_requests = redis_result.get("total_requests", 0)
+                
+                if current_requests > limit:
+                    # Получаем информацию о времени ожидания
+                    info = redis_service.get_rate_limit_info(redis_key, window_minutes=1)
+                    oldest_request_str = info.get("oldest_request")
+                    
+                    if oldest_request_str:
+                        try:
+                            oldest_request = datetime.fromisoformat(oldest_request_str)
+                            next_available = oldest_request + timedelta(minutes=1)
+                            now = datetime.utcnow()
+                            seconds_to_wait = max(0, int((next_available - now).total_seconds()))
+                        except:
+                            seconds_to_wait = 60
+                    else:
+                        seconds_to_wait = 60
+                    
+                    return {
+                        "allowed": False,
+                        "current_requests": current_requests,
+                        "limit": limit,
+                        "seconds_to_wait": seconds_to_wait,
+                        "is_authenticated": is_authenticated,
+                        "retry_after": seconds_to_wait,
+                        "storage": "redis"
+                    }
+                
+                return {
+                    "allowed": True,
+                    "current_requests": current_requests,
+                    "limit": limit,
+                    "seconds_to_wait": 0,
+                    "is_authenticated": is_authenticated,
+                    "retry_after": 0,
+                    "storage": "redis"
+                }
+            else:
+                # Fallback к in-memory хранилищу
+                logger.info("Redis недоступен, используем in-memory rate limiting")
+                return self._fallback_rate_limit(ip, path, is_authenticated, limit)
+            
+        except Exception as e:
+            logger.error(f"Ошибка в check_rate_limit_with_auth: {e}")
+            # В случае ошибки разрешаем запрос
+            return {
+                "allowed": True,
+                "current_requests": 0,
+                "limit": 1000,
+                "seconds_to_wait": 0,
+                "is_authenticated": is_authenticated,
+                "retry_after": 0,
+                "error": str(e),
+                "storage": "error"
+            }
+    
+    def _fallback_rate_limit(self, ip: str, path: str, is_authenticated: bool, limit: int) -> dict:
+        """Fallback к in-memory rate limiting"""
+        try:
+            now = datetime.utcnow()
+            window_start = now - timedelta(minutes=1)
+            
+            # Очищаем старые записи безопасно
+            if ip in self.rate_limits:
+                self.rate_limits[ip] = deque([
+                    timestamp for timestamp in self.rate_limits[ip] 
+                    if timestamp > window_start
+                ])
+            
+            # Проверяем лимит
+            current_requests = len(self.rate_limits[ip]) if ip in self.rate_limits else 0
+            
             # Вычисляем время до следующего доступного запроса
             if current_requests >= limit:
                 # Находим самый старый запрос в текущем окне
@@ -265,10 +337,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                     "limit": limit,
                     "seconds_to_wait": seconds_to_wait,
                     "is_authenticated": is_authenticated,
-                    "path": path
+                    "retry_after": seconds_to_wait,
+                    "storage": "memory"
                 }
             
             # Добавляем текущий запрос
+            if ip not in self.rate_limits:
+                self.rate_limits[ip] = deque()
             self.rate_limits[ip].append(now)
             
             return {
@@ -277,12 +352,22 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 "limit": limit,
                 "seconds_to_wait": 0,
                 "is_authenticated": is_authenticated,
-                "path": path
+                "retry_after": 0,
+                "storage": "memory"
             }
             
         except Exception as e:
-            logger.warning(f"Ошибка проверки rate limit для IP {ip}: {e}")
-            return {"allowed": True, "error": str(e)}
+            logger.error(f"Ошибка в fallback rate limit: {e}")
+            return {
+                "allowed": True,
+                "current_requests": 0,
+                "limit": limit,
+                "seconds_to_wait": 0,
+                "is_authenticated": is_authenticated,
+                "retry_after": 0,
+                "error": str(e),
+                "storage": "memory_error"
+            }
 
     def check_rate_limit(self, ip: str, path: str) -> bool:
         """Безопасная проверка лимита запросов"""

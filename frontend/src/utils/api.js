@@ -10,6 +10,9 @@ export async function fetchWithAuth(url, options = {}) {
   // Создаем копию опций чтобы не мутировать оригинал
   const fetchOptions = { ...options }
   
+  // Добавляем CORS настройки
+  fetchOptions.credentials = 'include'
+  
   // Инициализируем headers если их нет
   if (!fetchOptions.headers) {
     fetchOptions.headers = {}

@@ -29,6 +29,7 @@ services:
     restart: unless-stopped
     depends_on:
       - mysql
+      - redis
 
   frontend:
     build: ./frontend
@@ -37,7 +38,18 @@ services:
       - "8080:80"
     restart: unless-stopped
     depends_on:
-      - backend 
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    container_name: generator-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
 
 volumes:
-  mysql_data: 
+  mysql_data:
+  redis_data: 

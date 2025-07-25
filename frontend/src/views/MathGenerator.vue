@@ -189,13 +189,15 @@ export default {
           ? await fetch('http://localhost:8000/api/math-generator', {
               method: 'POST',
               body: formData,
+              credentials: 'include',
               headers: {
                 'Authorization': `Bearer ${this.$store.state.auth.token}`
               }
             })
           : await fetch('http://localhost:8000/api/math-generator', {
               method: 'POST',
-              body: formData
+              body: formData,
+              credentials: 'include'
             })
         
         if (response.ok) {

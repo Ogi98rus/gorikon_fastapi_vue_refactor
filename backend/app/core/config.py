@@ -26,7 +26,8 @@ class Settings(BaseSettings):
     # JWT настройки (для аутентификации)
     secret_key: str = "your-secret-key-change-in-production"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
+    access_token_expire_minutes: int = 1440  # 24 часа для разработки
+    refresh_token_expire_days: int = 30
     
     # Настройки файлов
     max_file_size: int = 50 * 1024 * 1024  # 50MB
