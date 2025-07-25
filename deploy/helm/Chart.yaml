@@ -1,0 +1,5 @@
+apiVersion: v2
+name: generator
+version: 0.1.0
+description: Генератор примеров и расписаний (FastAPI + Vue)
+type: application 

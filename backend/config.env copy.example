@@ -1,0 +1,51 @@
+# Основные настройки приложения
+APP_NAME="Генератор учебных материалов"
+APP_VERSION="2.0.0"
+DEBUG=false
+
+# База данных MySQL (единственная поддерживаемая)
+# Можно использовать либо готовый URL, либо отдельные параметры
+DATABASE_URL="mysql+pymysql://generator_user:generator_password@mysql:3306/generator_db"
+
+# Или через отдельные параметры (используются если DATABASE_URL не задан)
+MYSQL_HOST="mysql"
+MYSQL_PORT=3306
+MYSQL_USER="generator_user"
+MYSQL_PASSWORD="generator_password"
+MYSQL_DATABASE="generator_db"
+
+# JWT настройки
+SECRET_KEY="your-super-secret-jwt-key-change-this-in-production"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Настройки файлов
+MAX_FILE_SIZE=52428800  # 50MB
+TEMP_DIR="./temp"
+GENERATED_FILES_DIR="./generated_files"
+
+# Безопасность и лимиты
+RATE_LIMIT_PER_MINUTE=60
+
+# Математический генератор
+MAX_OPERANDS=10
+MAX_EXAMPLES=1000
+MIN_INTERVAL=-1000
+MAX_INTERVAL=1000
+
+# КТП генератор
+MAX_LESSONS_PER_DAY=15
+
+# Дополнительные настройки
+ENABLE_ANALYTICS=true
+ENABLE_USER_REGISTRATION=true
+
+# Email настройки (для будущего использования)
+EMAIL_FROM="noreply@generator.localhost"
+EMAIL_SMTP_HOST="smtp.gmail.com"
+EMAIL_SMTP_PORT=587 
+
+# CORS настройки
+ALLOWED_ORIGINS=["*"]
+ALLOWED_METHODS=["*"]
+ALLOWED_HEADERS=["*"] 

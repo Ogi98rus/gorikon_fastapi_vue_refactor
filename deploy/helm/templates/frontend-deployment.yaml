@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generator-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generator-frontend
+  template:
+    metadata:
+      labels:
+        app: generator-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+          ports:
+            - containerPort: 80 

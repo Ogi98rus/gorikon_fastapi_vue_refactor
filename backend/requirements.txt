@@ -1,0 +1,46 @@
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Validation and Settings
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# File Generation
+fpdf2==2.8.3
+pandas==2.1.4
+openpyxl==3.1.2
+
+# API Dependencies
+python-multipart==0.0.6
+
+# Database (for future use)
+sqlalchemy==2.0.23
+alembic==1.13.0
+
+# Authentication (for future use)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0
+python-multipart==0.0.6
+
+# HTTP Client (for future integrations)
+httpx==0.25.2
+
+# Development and Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# Logging and Monitoring
+structlog==23.2.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Type Hints
+typing-extensions==4.8.0 
+
+# MySQL Database Driver
+pymysql==1.1.0
+cryptography==41.0.7 

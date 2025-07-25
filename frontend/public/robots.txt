@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Основные страницы
+Allow: /math-generator
+Allow: /ktp-generator
+
+# Исключаем технические страницы
+Disallow: /result
+
+# Ссылка на карту сайта
+Sitemap: https://generator.gorikon.ru/sitemap.xml 

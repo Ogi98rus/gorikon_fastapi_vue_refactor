@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    
+    <!-- Основные мета-теги -->
+    <meta name="description" content="Генератор математических примеров и календарно-тематического планирования для учителей">
+    <meta name="author" content="Команда разработки">
+    <meta name="keywords" content="генератор, математика, КТП, планирование, образование, учителя">
+    
+    <!-- PWA мета-теги -->
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="УчМатериалы">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Иконки -->
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link rel="apple-touch-icon" href="<%= BASE_URL %>icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="<%= BASE_URL %>icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="<%= BASE_URL %>icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="<%= BASE_URL %>icons/icon-128x128.png">
+    
+    <!-- PWA манифест -->
+    <link rel="manifest" href="<%= BASE_URL %>manifest.json">
+    
+    <title>Генератор учебных материалов</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>К сожалению, это приложение не работает без JavaScript. Пожалуйста, включите его для продолжения.</strong>
+    </noscript>
+    <div id="app"></div>
+    
+    <!-- Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('📦 Service Worker зарегистрирован:', registration.scope);
+            })
+            .catch((error) => {
+              console.log('❌ Service Worker не зарегистрирован:', error);
+            });
+        });
+      }
+    </script>
+    
+    <!-- built files will be auto injected -->
+  </body>
+</html>
