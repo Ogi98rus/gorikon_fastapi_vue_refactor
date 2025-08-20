@@ -1,20 +1,55 @@
+version: '3.8'
+
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    ports:
+      - "80:80"  # Только HTTP для локального прокси
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - traefik
+    restart: unless-stopped
+
   backend:
     build: ./backend
     container_name: generator-backend
-    ports:
-      - "8000:8000"
+    # Убираем прямые порты, используем Traefik
+    # ports:
+    #   - "8000:8000"
     environment:
       - DEBUG=true
     volumes:
       - ./generated_files:/app/generated_files
+    networks:
+      - traefik
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`gorikon.ru`) && PathPrefix(`/api/`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.backend.entrypoints=web"
 
   frontend:
     build: ./frontend
     container_name: generator-frontend
-    ports:
-      - "8080:80"
+    # Убираем прямые порты, используем Traefik
+    # ports:
+    #   - "8080:80"
+    networks:
+      - traefik
     restart: unless-stopped
     depends_on:
-      - backend 
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`gorikon.ru`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.entrypoints=web"
+
+networks:
+  traefik:
+    external: false 
