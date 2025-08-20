@@ -55,6 +55,11 @@ const BASE_TRANSLATIONS = {
     'common.reset': 'Сбросить',
     'common.search': 'Поиск',
     'common.filter': 'Фильтр',
+    'common.russian': 'Русский',
+    'common.english': 'English',
+    'common.kazakh': 'Қазақша',
+    'common.belarusian': 'Беларуская',
+    'common.ukrainian': 'Українська',
     
     // Навигация
     'nav.home': 'Главная',
@@ -126,6 +131,11 @@ const BASE_TRANSLATIONS = {
     'common.reset': 'Reset',
     'common.search': 'Search',
     'common.filter': 'Filter',
+    'common.russian': 'Русский',
+    'common.english': 'English',
+    'common.kazakh': 'Қазақша',
+    'common.belarusian': 'Беларуская',
+    'common.ukrainian': 'Українська',
     
     // Navigation
     'nav.home': 'Home',
@@ -219,6 +229,7 @@ const mutations = {
   },
   
   SET_CURRENT_LANGUAGE(state, language) {
+    console.log('Setting current language:', language)
     state.currentLanguage = language
     
     // Обновляем настройки локализации в зависимости от языка
@@ -256,6 +267,12 @@ const mutations = {
           currency: 'RUB'
         }
     }
+    
+    console.log('Language set, current state:', {
+      currentLanguage: state.currentLanguage,
+      hasTranslations: !!state.translations[language],
+      translationKeys: Object.keys(state.translations[language] || {})
+    })
   },
   
   SET_TRANSLATIONS(state, { language, translations }) {
@@ -379,13 +396,27 @@ const getters = {
   // Текущий язык
   currentLanguage: state => state.currentLanguage,
   currentLanguageInfo: state => SUPPORTED_LANGUAGES[state.currentLanguage],
+  getCurrentLanguage: state => state.currentLanguage,
   
   // Доступные языки
   availableLanguages: state => Object.values(state.availableLanguages),
   supportedLanguageCodes: state => Object.keys(state.availableLanguages),
   
   // Переводы
-  translations: state => state.translations[state.currentLanguage] || {},
+  translations: state => {
+    const currentLang = state.currentLanguage
+    const translations = state.translations[currentLang] || state.translations['ru'] || {}
+    
+    console.log('Store translations getter:', {
+      currentLang,
+      hasCurrentLangTranslations: !!state.translations[currentLang],
+      hasFallbackTranslations: !!state.translations['ru'],
+      translationKeys: Object.keys(translations),
+      allLanguages: Object.keys(state.translations)
+    })
+    
+    return translations
+  },
   
   // Функция перевода
   t: (state) => (key, params = {}) => {

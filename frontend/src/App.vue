@@ -27,23 +27,23 @@
           <div class="nav-menu" :class="{ 'active': isMobileMenuOpen }">
             <div class="nav-links">
               <router-link to="/" class="nav-link" @click="closeMobileMenu">
-                🏠 Главная
+                🏠 {{ $t('nav.home') }}
               </router-link>
               <router-link to="/math" class="nav-link" @click="closeMobileMenu">
-                🧮 Математика
+                🧮 {{ $t('nav.math') }}
               </router-link>
               <router-link to="/ktp" class="nav-link" @click="closeMobileMenu">
-                📅 КТП
+                📅 {{ $t('nav.ktp') }}
               </router-link>
             </div>
 
             <!-- Language Selector -->
             <div class="language-selector">
               <select v-model="selectedLanguage" @change="changeLanguage">
-                <option value="ru">🇷🇺 Русский</option>
-                <option value="en">🇺🇸 English</option>
-                <option value="kk">🇰🇿 Қазақша</option>
-                <option value="be">🇧🇾 Беларуская</option>
+                <option value="ru">🇷🇺 {{ $t('common.russian') }}</option>
+                <option value="en">🇺🇸 {{ $t('common.english') }}</option>
+                <option value="kk">🇰🇿 {{ $t('common.kazakh') }}</option>
+                <option value="be">🇧🇾 {{ $t('common.belarusian') }}</option>
               </select>
             </div>
           </div>
@@ -59,6 +59,8 @@
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex'
+
 export default {
   name: 'App',
   
@@ -72,6 +74,14 @@ export default {
   computed: {
     showNavigation() {
       return true
+    },
+    
+    ...mapState('i18n', ['currentLanguage'])
+  },
+
+  watch: {
+    currentLanguage(newLang) {
+      this.selectedLanguage = newLang
     }
   },
 
@@ -88,23 +98,73 @@ export default {
   },
 
   methods: {
-    initializeLanguage() {
-      // Получаем сохраненный язык или используем язык браузера
-      const savedLanguage = localStorage.getItem('selected_language')
-      const browserLanguage = navigator.language.split('-')[0]
+    ...mapActions('i18n', ['setLanguage']),
+    
+    // Методы для переводов (временное решение)
+    $t(key, params = {}) {
+      const translations = this.$store.getters['i18n/translations']
+      const currentLang = this.$store.getters['i18n/currentLanguage']
       
-      this.selectedLanguage = savedLanguage || 
-        (['ru', 'en', 'kk', 'be', 'uk'].includes(browserLanguage) ? browserLanguage : 'ru')
+      console.log('Translation debug:', {
+        key,
+        currentLang,
+        translations,
+        hasTranslations: !!translations,
+        translationKeys: Object.keys(translations || {})
+      })
       
-      this.changeLanguage()
+      let text = translations[key] || key
+      
+      // Подстановка параметров
+      Object.keys(params).forEach(param => {
+        text = text.replace(new RegExp(`{${param}}`, 'g'), params[param])
+      })
+      
+      return text
+    },
+    
+    $getLanguage() {
+      return this.$store.getters['i18n/getCurrentLanguage']
+    },
+    
+    async initializeLanguage() {
+      try {
+        console.log('Initializing language...')
+        
+        // Получаем сохраненный язык или используем язык браузера
+        const savedLanguage = localStorage.getItem('selected_language')
+        const browserLanguage = navigator.language.split('-')[0]
+        
+        console.log('Language detection:', { savedLanguage, browserLanguage })
+        
+        const language = savedLanguage || 
+          (['ru', 'en', 'kk', 'be', 'uk'].includes(browserLanguage) ? browserLanguage : 'ru')
+        
+        console.log('Selected language:', language)
+        
+        // Устанавливаем язык через store
+        await this.setLanguage(language)
+        this.selectedLanguage = language
+        
+        console.log('Language initialized successfully')
+      } catch (error) {
+        console.error('Failed to initialize language:', error)
+        // Fallback на русский язык
+        this.selectedLanguage = 'ru'
+      }
     },
 
-    changeLanguage() {
-      // Сохраняем выбранный язык
-      localStorage.setItem('selected_language', this.selectedLanguage)
-      
-      // Обновляем переводы (когда будет реализована i18n система)
-      this.$emit('language-changed', this.selectedLanguage)
+    async changeLanguage() {
+      try {
+        console.log('Changing language to:', this.selectedLanguage)
+        
+        // Устанавливаем язык через store
+        await this.setLanguage(this.selectedLanguage)
+        
+        console.log('Language changed successfully')
+      } catch (error) {
+        console.error('Failed to change language:', error)
+      }
     },
 
     toggleMobileMenu() {
