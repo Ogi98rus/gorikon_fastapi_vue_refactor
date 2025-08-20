@@ -9,19 +9,6 @@ const STATIC_CACHE_FILES = [
   '/index.html',
   '/manifest.json',
   '/favicon.ico',
-  
-  // Стили и скрипты (будут добавлены автоматически)
-  '/static/css/main.css',
-  '/static/js/main.js',
-  
-  // Изображения
-  '/static/media/logo.png',
-  '/static/media/logo_dark.png',
-  '/static/media/black_on_trans.png',
-  
-  // Иконки PWA
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
 ];
 
 // Файлы API для динамического кеширования
@@ -47,7 +34,15 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('📁 Service Worker: Кеширование основных файлов');
-        return cache.addAll(STATIC_CACHE_FILES);
+        // Кешируем файлы по одному, чтобы избежать ошибок
+        return Promise.allSettled(
+          STATIC_CACHE_FILES.map(url => 
+            cache.add(url).catch(err => {
+              console.warn('⚠️ Не удалось закешировать:', url, err);
+              return null;
+            })
+          )
+        );
       })
       .then(() => {
         console.log('✅ Service Worker: Установлен');

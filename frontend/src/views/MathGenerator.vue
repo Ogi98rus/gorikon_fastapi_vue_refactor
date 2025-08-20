@@ -244,7 +244,7 @@ export default {
         formData.append('example_count', this.formData.exampleCount)
         formData.append('for_teacher', forTeacher)
         
-        const response = await fetch('http://localhost:8000/api/math-generator', {
+        const response = await fetch('/api/math-generator', {
           method: 'POST',
           body: formData,
           credentials: 'include'
@@ -338,7 +338,7 @@ export default {
       formData.append('example_count', this.formData.exampleCount)
       formData.append('for_teacher', forTeacher)
       
-      const response = await fetch('http://localhost:8000/api/math-generator', {
+              const response = await fetch('/api/math-generator', {
         method: 'POST',
         body: formData,
         credentials: 'include'

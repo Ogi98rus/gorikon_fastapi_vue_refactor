@@ -381,7 +381,7 @@ export default {
         vacationDates.forEach(date => formData.append('vacation', date))
         formData.append('file_name', this.formData.fileName)
         
-        const response = await fetch('http://localhost:8000/api/ktp-generator', {
+        const response = await fetch('/api/ktp-generator', {
           method: 'POST',
           body: formData,
           credentials: 'include'

@@ -6,7 +6,8 @@ import axios from 'axios'
 import i18nMixin from './utils/i18n-mixin'
 
 // Конфигурация Axios
-axios.defaults.baseURL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8000'
+// Используем относительные URL для работы с прокси
+axios.defaults.baseURL = process.env.VUE_APP_API_BASE_URL || ''
 axios.defaults.timeout = 30000
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 
