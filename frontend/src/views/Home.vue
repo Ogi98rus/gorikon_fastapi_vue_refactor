@@ -32,7 +32,7 @@
           <h3>{{ $t('common.serverSupport') }} 🍪✨</h3>
           <div class="iframe-container">
             <iframe
-              src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=159RQI2K3KC.240916"
+              src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=159RQI2K3KC.240916&"
               width="500" 
               height="50"
               frameborder="0"
