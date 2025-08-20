@@ -64,7 +64,14 @@ app.add_middleware(I18nMiddleware)
 # CORS должен быть добавлен ПОСЛЕДНИМ, чтобы выполняться ПЕРВЫМ!
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:8080", 
+        "http://127.0.0.1:8080", 
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://gorikon.ru",
+        "http://gorikon.ru"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],

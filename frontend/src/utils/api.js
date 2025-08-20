@@ -24,7 +24,8 @@ export async function fetchWithAuth(url, options = {}) {
   }
   
   // Делаем запрос к бэкенду
-  const fullUrl = url.startsWith('http') ? url : `http://localhost:8000${url}`
+  // Используем относительные URL для работы с прокси
+  const fullUrl = url.startsWith('http') ? url : url
   return fetch(fullUrl, fetchOptions)
 }
 
