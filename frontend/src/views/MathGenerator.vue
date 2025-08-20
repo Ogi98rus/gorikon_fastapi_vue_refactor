@@ -310,17 +310,50 @@ export default {
         formData.append('interval_end', this.formData.intervalEnd)
         formData.append('example_count', this.formData.exampleCount)
         
-        // Сначала скачиваем версию для ученика
-        await this.downloadPDFInternal(false)
+        // Используем новый endpoint для скачивания ОБОИХ вариантов
+        const response = await fetch('/api/math-generator-both', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        })
         
-        // Затем скачиваем версию для учителя
-        await this.downloadPDFInternal(true)
-        
-        // Показываем сообщение об успехе
-        this.error = null
-        
-        // Закрываем модальное окно после успешного скачивания
-        this.showDownloadModal = false
+        if (response.ok) {
+          const blob = await response.blob()
+          
+          // Отладочная информация
+          console.log(`ZIP архив скачан: размер ${blob.size} байт, тип: ${blob.type}`)
+          
+          if (blob.size < 1000) {
+            console.warn('ВНИМАНИЕ: ZIP архив слишком маленький, возможно есть проблема')
+            this.error = 'ZIP архив слишком маленький, возможно есть проблема генерации'
+            return
+          }
+          
+          // Создаем ссылку для скачивания
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          
+          // Формируем имя файла
+          const filename = `математические_примеры_${this.formData.exampleCount}_оба_варианта.zip`
+          link.setAttribute('download', filename)
+          
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
+          
+          // Очищаем URL
+          window.URL.revokeObjectURL(url)
+          
+          // Показываем сообщение об успехе
+          this.error = null
+          
+          // Закрываем модальное окно после успешного скачивания
+          this.showDownloadModal = false
+        } else {
+          const errorData = await response.json()
+          this.error = errorData.detail || errorData.error || this.$t('math.pdfError')
+        }
       } catch (err) {
         this.error = this.$t('math.connectionError')
       } finally {

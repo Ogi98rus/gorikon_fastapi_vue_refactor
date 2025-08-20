@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from typing import List
 import os
 import time
-from app.services.math_generator import generate_math_pdf
+from app.services.math_generator import generate_math_pdf, generate_both_math_pdfs
 from app.models.schemas import MathGeneratorRequest, MathOperation
 from app.core.config import settings
 
@@ -85,6 +85,89 @@ async def generate_math_problems(
             detail=f"Ошибка генерации PDF: {str(e)}"
         )
 
+@router.post("/generate-both")
+async def generate_both_math_pdfs_endpoint(
+    request: Request,
+    num_operands: int = Form(2, ge=2, le=10),
+    operations: List[str] = Form(..., alias="operations"),
+    interval_start: int = Form(0, ge=-1000, le=1000),
+    interval_end: int = Form(100, ge=-1000, le=1000),
+    example_count: int = Form(10, ge=1, le=100)
+):
+    """
+    Генерация ОБОИХ вариантов PDF с ОДИНАКОВЫМИ примерами
+    
+    **Параметры:**
+    - `num_operands`: Количество операндов в примере (2-10)
+    - `operations`: Операции (+, -, *, /)
+    - `interval_start`: Начало диапазона чисел
+    - `interval_end`: Конец диапазона чисел  
+    - `example_count`: Количество примеров (1-100)
+    
+    **Возвращает:** ZIP архив с двумя PDF файлами
+    """
+    
+    start_time = time.time()
+    
+    try:
+        # Валидация операций
+        valid_operations = ['+', '-', '*', '/']
+        filtered_operations = [op for op in operations if op in valid_operations]
+        
+        if not filtered_operations:
+            raise HTTPException(
+                status_code=400,
+                detail="Необходимо выбрать хотя бы одну операцию из: +, -, *, /"
+            )
+        
+        # Создаем объект запроса
+        math_request = MathGeneratorRequest(
+            num_operands=num_operands,
+            operations=[MathOperation(value=op) for op in filtered_operations],
+            interval_start=interval_start,
+            interval_end=interval_end,
+            example_count=example_count
+        )
+        
+        # Генерируем ОБА PDF с ОДИНАКОВЫМИ примерами
+        student_pdf, teacher_pdf = generate_both_math_pdfs(math_request)
+        
+        # Создаем ZIP архив
+        import zipfile
+        import tempfile
+        
+        temp_dir = settings.temp_dir
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        zip_path = tempfile.NamedTemporaryFile(delete=False, suffix='.zip', dir=temp_dir)
+        
+        with zipfile.ZipFile(zip_path.name, 'w') as zip_file:
+            # Добавляем PDF для ученика
+            zip_file.write(student_pdf, f"math_examples_{example_count}_student.pdf")
+            # Добавляем PDF для учителя
+            zip_file.write(teacher_pdf, f"math_examples_{example_count}_teacher.pdf")
+        
+        # Измеряем время обработки
+        processing_time = int((time.time() - start_time) * 1000)
+        
+        # Возвращаем ZIP архив
+        return FileResponse(
+            zip_path.name,
+            media_type='application/zip',
+            filename=f"math_examples_{example_count}_both_variants.zip",
+            headers={
+                'X-Processing-Time': str(processing_time),
+                'X-Examples-Count': str(example_count),
+                'X-Variant': 'both'
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка генерации PDF: {str(e)}"
+        )
+
 # Legacy endpoint
 @legacy_router.post("/math-generator")
 async def legacy_math_generator(
@@ -100,4 +183,19 @@ async def legacy_math_generator(
     return await generate_math_problems(
         request, num_operands, operations, 
         interval_start, interval_end, example_count, for_teacher
+    )
+
+@legacy_router.post("/math-generator-both")
+async def legacy_math_generator_both(
+    request: Request,
+    num_operands: int = Form(2, ge=2, le=10),
+    operations: List[str] = Form(..., alias="operations"),
+    interval_start: int = Form(0, ge=-1000, le=1000),
+    interval_end: int = Form(100, ge=-1000, le=1000),
+    example_count: int = Form(10, ge=1, le=100)
+):
+    """Legacy endpoint для скачивания обоих вариантов"""
+    return await generate_both_math_pdfs_endpoint(
+        request, num_operands, operations, 
+        interval_start, interval_end, example_count
     ) 
