@@ -1,9 +1,6 @@
 <template>
   <div class="page-container">
     <div id="bg"></div>
-    <button class="theme-toggle" @click="toggleTheme">
-      {{ isDark ? '☀️' : '🌙' }}
-    </button>
     
     <div class="container">
       <header>
@@ -250,42 +247,53 @@ export default {
     }
   },
   mounted() {
+    // Загружаем тему из App.vue
     this.loadTheme()
+    // Слушаем изменения темы через MutationObserver
+    this.observeThemeChanges()
+    
     this.setDefaultDates()
     this.initializeWeekDays()
   },
+  
+  beforeUnmount() {
+    // Очищаем observer
+    if (this.themeObserver) {
+      this.themeObserver.disconnect()
+    }
+  },
   methods: {
-    toggleTheme() {
-      this.isDark = !this.isDark
-      this.applyTheme()
-      localStorage.setItem('theme', this.isDark ? 'dark' : 'light')
-    },
     loadTheme() {
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme) {
-        this.isDark = savedTheme === 'dark'
-      } else {
-        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      }
-      this.applyTheme()
+      this.isDark = document.documentElement.hasAttribute('data-theme')
     },
+    
+    observeThemeChanges() {
+      // Создаем MutationObserver для отслеживания изменений атрибута data-theme
+      this.themeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+            this.loadTheme()
+          }
+        })
+      })
+      
+      // Начинаем наблюдение за изменениями атрибутов
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      })
+    },
+    
     initializeWeekDays() {
       this.weekDays = [
         this.$t('ktp.weekdayMonday'),
         this.$t('ktp.weekdayTuesday'),
-        this.$t('ktp.weekdayWednesday'),
+        this.$t('ktp.weekdayTuesday'),
         this.$t('ktp.weekdayThursday'),
         this.$t('ktp.weekdayFriday'),
         this.$t('ktp.weekdaySaturday'),
         this.$t('ktp.weekdaySunday')
       ]
-    },
-    applyTheme() {
-      if (this.isDark) {
-        document.documentElement.setAttribute('data-theme', 'dark')
-      } else {
-        document.documentElement.removeAttribute('data-theme')
-      }
     },
     setDefaultDates() {
       const now = new Date()

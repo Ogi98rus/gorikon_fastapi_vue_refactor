@@ -42,6 +42,7 @@ const BASE_TRANSLATIONS = {
     'common.recommendation': 'Рекомендация',
     'common.russian': 'Русский',
     'common.english': 'English',
+    'common.toggleTheme': 'Toggle theme',
     
     // Навигация
     'nav.home': 'Главная',

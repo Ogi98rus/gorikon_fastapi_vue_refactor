@@ -12,6 +12,16 @@
             </router-link>
           </div>
 
+          <!-- Theme Toggle Button -->
+          <button
+            class="theme-toggle-btn"
+            @click="toggleTheme"
+            :title="$t('common.toggleTheme')"
+          >
+            <span v-if="isDark">☀️</span>
+            <span v-else>🌙</span>
+          </button>
+
           <!-- Mobile menu toggle -->
           <button
             class="mobile-menu-toggle"
@@ -65,7 +75,8 @@ export default {
   data() {
     return {
       isMobileMenuOpen: false,
-      selectedLanguage: 'ru'
+      selectedLanguage: 'ru',
+      isDark: false
     }
   },
 
@@ -86,6 +97,9 @@ export default {
   mounted() {
     // Инициализация языка
     this.initializeLanguage()
+    
+    // Загружаем тему
+    this.loadTheme()
     
     // Обработка изменения размера экрана
     window.addEventListener('resize', this.handleResize)
@@ -134,6 +148,32 @@ export default {
 
     closeMobileMenu() {
       this.isMobileMenuOpen = false
+    },
+    
+    toggleTheme() {
+      this.isDark = !this.isDark
+      this.applyTheme()
+      localStorage.setItem('theme', this.isDark ? 'dark' : 'light')
+    },
+    
+    loadTheme() {
+      const savedTheme = localStorage.getItem('theme')
+      if (savedTheme) {
+        this.isDark = savedTheme === 'dark'
+      } else {
+        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      }
+      this.applyTheme()
+    },
+    
+    applyTheme() {
+      if (this.isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        console.log('🌙 Тема изменена на темную')
+      } else {
+        document.documentElement.removeAttribute('data-theme')
+        console.log('☀️ Тема изменена на светлую')
+      }
     },
 
     handleResize() {
@@ -200,6 +240,27 @@ export default {
 
 .brand-text {
   color: var(--accent-primary);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  margin-right: 15px;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--hover-bg);
+  transform: scale(1.1);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
 }
 
 .nav-menu {
@@ -588,8 +649,19 @@ export default {
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+  .nav-container {
+    padding: 10px 0;
+  }
+  
+  .theme-toggle-btn {
+    margin-right: 10px;
+    font-size: 16px;
+    padding: 6px;
+  }
+  
   .mobile-menu-toggle {
     display: flex;
+    margin-left: 10px;
   }
   
   .nav-menu {
@@ -606,6 +678,7 @@ export default {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    z-index: 999;
   }
   
   .nav-menu.active {
@@ -679,6 +752,32 @@ export default {
   .pwa-actions {
     flex-direction: row;
     justify-content: center;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 8px 0;
+  }
+  
+  .theme-toggle-btn {
+    margin-right: 8px;
+    font-size: 14px;
+    padding: 4px;
+  }
+  
+  .mobile-menu-toggle {
+    margin-left: 8px;
+  }
+  
+  .brand-text {
+    font-size: 16px;
+  }
+  
+  .brand-logo {
+    height: 28px;
+    margin-right: 8px;
   }
 }
 </style>
