@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import i18nMixin from './utils/i18n-mixin'
 
 // Конфигурация Axios
 axios.defaults.baseURL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8000'
@@ -12,8 +13,15 @@ axios.defaults.headers.common['Content-Type'] = 'application/json'
 // Добавляем axios в глобальные свойства
 const app = createApp(App)
 
+// Подключаем плагины СНАЧАЛА
+app.use(store)
+app.use(router)
+
 // Глобальные свойства
 app.config.globalProperties.$http = axios
+
+// Глобальный миксин для i18n ПОСЛЕ подключения store
+app.mixin(i18nMixin)
 
 // Интерсепторы для axios
 axios.interceptors.request.use(
@@ -52,9 +60,7 @@ axios.interceptors.response.use(
   }
 )
 
-// Подключаем плагины
-app.use(store)
-app.use(router)
+
 
 // Инициализация приложения
 async function initializeApp() {

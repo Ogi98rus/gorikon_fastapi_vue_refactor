@@ -8,12 +8,12 @@
     <div class="container">
       <header>
         <img :src="logoSrc" alt="Логотип Gorikon" class="logo">
-        <h1>📅 Генератор для КТП</h1>
+        <h1>📅 {{ $t('ktp.title') }}</h1>
       </header>
       
       <main>
         <form @submit.prevent="generateSchedule">
-          <label for="start_date">Начальная дата:</label>
+          <label for="start_date">{{ $t('ktp.startDateLabel') }}</label>
           <input 
             type="date" 
             id="start_date" 
@@ -21,7 +21,7 @@
             required
           >
           
-          <label for="end_date">Конечная дата:</label>
+          <label for="end_date">{{ $t('ktp.endDateLabel') }}</label>
           <input 
             type="date" 
             id="end_date" 
@@ -29,10 +29,10 @@
             required
           >
           <div class="hint">
-            <strong>Подсказка:</strong> Укажите период учебного года (например, с 01.09.2024 по 31.05.2025)
+            <strong>{{ $t('common.hint') }}:</strong> {{ $t('ktp.dateHint') }}
           </div>
           
-          <label>Дни недели и количество уроков в день:</label>
+          <label>{{ $t('ktp.weekdaysLabel') }}</label>
           <div class="weekday-section">
             <div v-for="(day, index) in weekDays" :key="index" class="weekday-row">
               <label class="weekday-label">
@@ -49,68 +49,68 @@
                 min="1" 
                 max="10"
                 :disabled="!formData.weekdays.includes(index)"
-                placeholder="Уроков"
+                :placeholder="$t('ktp.lessonsPlaceholder')"
               >
             </div>
           </div>
           <div class="hint">
-            <strong>Подсказка:</strong> Выберите рабочие дни недели и укажите количество уроков в каждый день
+            <strong>{{ $t('common.hint') }}:</strong> {{ $t('ktp.weekdaysHint') }}
           </div>
           
-          <label for="holidays">Праздничные дни (разделитель - запятая):</label>
+          <label for="holidays">{{ $t('ktp.holidaysLabel') }}</label>
           <input 
             type="text" 
             id="holidays" 
             v-model="formData.holidays" 
-            placeholder="08.03.2025, 01.05.2025, 09.05.2025"
+            :placeholder="$t('ktp.holidaysPlaceholder')"
           >
           <div class="example">
-            <strong>Пример:</strong> <span class="example-red">08.03.2025,01.05.2025,09.05.2025</span>
+            <strong>{{ $t('common.example') }}:</strong> <span class="example-red">{{ $t('ktp.holidaysExample') }} 08.03.2025,01.05.2025,09.05.2025</span>
           </div>
           
-          <label for="autumn_start">Начало осенних каникул:</label>
+          <label for="autumn_start">{{ $t('ktp.autumnStart') }}</label>
           <input 
             type="date" 
             id="autumn_start" 
             v-model="formData.autumnStart"
           >
           
-          <label for="autumn_end">Конец осенних каникул:</label>
+          <label for="autumn_end">{{ $t('ktp.autumnEnd') }}</label>
           <input 
             type="date" 
             id="autumn_end" 
             v-model="formData.autumnEnd"
           >
           
-          <label for="winter_start">Начало зимних каникул:</label>
+          <label for="winter_start">{{ $t('ktp.winterStart') }}</label>
           <input 
             type="date" 
             id="winter_start" 
             v-model="formData.winterStart"
           >
           
-          <label for="winter_end">Конец зимних каникул:</label>
+          <label for="winter_end">{{ $t('ktp.winterEnd') }}</label>
           <input 
             type="date" 
             id="winter_end" 
             v-model="formData.winterEnd"
           >
           
-          <label for="spring_start">Начало весенних каникул:</label>
+          <label for="spring_start">{{ $t('ktp.springStart') }}</label>
           <input 
             type="date" 
             id="spring_start" 
             v-model="formData.springStart"
           >
           
-          <label for="spring_end">Конец весенних каникул:</label>
+          <label for="spring_end">{{ $t('ktp.springEnd') }}</label>
           <input 
             type="date" 
             id="spring_end" 
             v-model="formData.springEnd"
           >
           <div class="hint">
-            <strong>Подсказка:</strong> Укажите периоды каникул. Эти дни будут исключены из расписания
+            <strong>{{ $t('common.hint') }}:</strong> {{ $t('ktp.holidaysHint') }}
           </div>
           
           <div class="first-grade-section">
@@ -119,68 +119,82 @@
                 type="checkbox" 
                 v-model="formData.includeFirstGradeVacation"
               >
-              <strong>+ Каникулы для 1 классов</strong>
+              <strong>+ {{ $t('ktp.firstClassHolidays') }}</strong>
             </label>
             
             <div v-if="formData.includeFirstGradeVacation" class="first-grade-dates">
-              <label for="first_grade_start">Начало дополнительных каникул для 1 классов:</label>
+              <label for="first_grade_start">{{ $t('ktp.firstGradeStart') }}</label>
               <input 
                 type="date" 
                 id="first_grade_start" 
                 v-model="formData.firstGradeStart"
               >
               
-              <label for="first_grade_end">Конец дополнительных каникул для 1 классов:</label>
+              <label for="first_grade_end">{{ $t('ktp.firstGradeEnd') }}</label>
               <input 
                 type="date" 
                 id="first_grade_end" 
                 v-model="formData.firstGradeEnd"
               >
               <div class="example">
-                <strong>Обычно:</strong> дополнительные каникулы для 1 классов проводятся в феврале (например, с 14.02 по 20.02)
+                <strong>{{ $t('ktp.firstGradeHint') }}</strong>
               </div>
             </div>
           </div>
           
-          <label for="file_name">Имя файла для сохранения:</label>
+          <label for="file_name">{{ $t('ktp.filenameLabel') }}</label>
           <input 
             type="text" 
             id="file_name" 
             v-model="formData.fileName" 
-            placeholder="schedule"
+            :placeholder="$t('ktp.filenamePlaceholder')"
           >
           <div class="example">
-            <strong>Пример:</strong> КТП_математика_5класс
+            <strong>{{ $t('common.example') }}:</strong> {{ $t('ktp.filenameExample') }}
           </div>
           
           <div class="button-group">
             <button type="submit" :disabled="loading">
-              {{ loading ? '⏳ Генерация...' : '📊 Сгенерировать расписание' }}
+              {{ loading ? $t('ktp.generating') : $t('ktp.generateButton') }}
             </button>
-            <router-link to="/" class="btn">🏠 На главную</router-link>
+            <router-link to="/" class="btn">{{ $t('ktp.homeButton') }}</router-link>
           </div>
         </form>
         
         <!-- Ошибка -->
         <div v-if="error" class="error-message">
-          <strong>Ошибка:</strong> {{ error }}
+          <strong>{{ $t('common.error') }}:</strong> {{ error }}
         </div>
       </main>
       
       <footer>
         <div class="hint">
-          <h3>⚠️ ВАЖНО! ДАТЫ КОТОРЫЕ НЕОБХОДИМО ДОБАВИТЬ ВРУЧНУЮ</h3>
-          <p><span class="example-green">28.12.2024 Суббота - работаем по вторнику</span></p>
-          <p>Такие переносы рабочих дней нужно добавлять в расписание самостоятельно</p>
+          <h3>{{ $t('ktp.importantNote') }}</h3>
+          <p><span class="example-green">{{ $t('ktp.workdayTransfer') }}</span></p>
+          <p>{{ $t('ktp.workdayTransferHint') }}</p>
         </div>
         
         <div class="hint">
-          <h3>ℹ️ Информация о генераторе</h3>
-          <p>• Генератор создает календарно-тематическое планирования в формате Excel</p>
-          <p>• Автоматически исключает праздники и каникулы</p>
-          <p>• Учитывает количество уроков по дням недели</p>
-          <p>• Поддерживает дополнительные каникулы для 1 классов</p>
-          <p>• Формат дат в файле: ДД.ММ для удобства</p>
+          <h3>{{ $t('ktp.generatorInfo') }}</h3>
+          <p>{{ $t('ktp.generatorInfo1') }}</p>
+          <p>{{ $t('ktp.generatorInfo2') }}</p>
+          <p>{{ $t('ktp.generatorInfo3') }}</p>
+          <p>{{ $t('ktp.generatorInfo4') }}</p>
+          <p>{{ $t('ktp.generatorInfo5') }}</p>
+        </div>
+        
+        <!-- Блок поддержки сервера -->
+        <div class="server-support">
+          <h3>{{ $t('common.serverSupport') }} 🍪✨</h3>
+          <div class="iframe-container">
+            <iframe
+              src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=159RQI2K3KC.240916"
+              width="500" 
+              height="50"
+              frameborder="0"
+              scrolling="no">
+            </iframe>
+          </div>
         </div>
       </footer>
     </div>
@@ -188,15 +202,18 @@
 </template>
 
 <script>
+import i18nMixin from '../utils/i18n-mixin'
+
 export default {
   name: 'KtpGenerator',
+  mixins: [i18nMixin],
   data() {
     return {
       isDark: false,
       loading: false,
       error: null,
 
-      weekDays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+      weekDays: [],
       formData: {
         startDate: '',
         endDate: '',
@@ -220,11 +237,22 @@ export default {
     logoSrc() {
       return this.isDark ? require('../assets/logo_dark.png') : require('../assets/logo.png')
     },
-
+    
+    currentLanguage() {
+      return this.$store.state.i18n.currentLanguage
+    }
+  },
+  
+  watch: {
+    currentLanguage() {
+      // Обновляем дни недели при смене языка
+      this.initializeWeekDays()
+    }
   },
   mounted() {
     this.loadTheme()
     this.setDefaultDates()
+    this.initializeWeekDays()
   },
   methods: {
     toggleTheme() {
@@ -240,6 +268,17 @@ export default {
         this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       }
       this.applyTheme()
+    },
+    initializeWeekDays() {
+      this.weekDays = [
+        this.$t('ktp.weekdayMonday'),
+        this.$t('ktp.weekdayTuesday'),
+        this.$t('ktp.weekdayWednesday'),
+        this.$t('ktp.weekdayThursday'),
+        this.$t('ktp.weekdayFriday'),
+        this.$t('ktp.weekdaySaturday'),
+        this.$t('ktp.weekdaySunday')
+      ]
     },
     applyTheme() {
       if (this.isDark) {
@@ -279,7 +318,7 @@ export default {
     },
     async generateSchedule() {
       if (this.formData.weekdays.length === 0) {
-        this.error = 'Выберите хотя бы один день недели'
+        this.error = this.$t('ktp.selectWeekdayError')
         return
       }
       
@@ -485,5 +524,47 @@ form {
   font-size: 0.9em;
   color: var(--text-secondary);
   margin-top: 5px;
+}
+
+/* Стили для блока поддержки сервера */
+.server-support {
+  margin-top: 40px;
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  max-width: 600px;
+}
+
+.server-support h3 {
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.iframe-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.iframe-container iframe {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 600px) {
+  .iframe-container iframe {
+    width: 100% !important;
+    max-width: 400px;
+  }
+  
+  .server-support {
+    margin: 20px 10px 0 10px;
+    padding: 15px;
+  }
 }
 </style> 

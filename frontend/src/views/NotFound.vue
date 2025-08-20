@@ -48,12 +48,6 @@
           <li>
             <router-link to="/ktp">📅 Генератор КТП</router-link>
           </li>
-          <li v-if="isAuthenticated">
-            <router-link to="/profile">👤 Профиль пользователя</router-link>
-          </li>
-          <li v-if="isAuthenticated">
-            <router-link to="/analytics">📊 Аналитика</router-link>
-          </li>
         </ul>
       </div>
 
@@ -70,6 +64,20 @@
           <button @click="performSearch" class="search-btn">
             🔍 Найти
           </button>
+        </div>
+      </div>
+
+      <!-- Блок поддержки сервера -->
+      <div class="server-support">
+        <h3>{{ $t('common.serverSupport') }} 🍪✨</h3>
+        <div class="iframe-container">
+          <iframe
+            src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=159RQI2K3KC.240916"
+            width="500" 
+            height="50"
+            frameborder="0"
+            scrolling="no">
+          </iframe>
         </div>
       </div>
 
@@ -94,9 +102,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import i18nMixin from '../utils/i18n-mixin'
 
 export default {
   name: 'NotFound',
+  mixins: [i18nMixin],
   
   data() {
     return {
@@ -393,6 +403,48 @@ export default {
   background: var(--accent-primary);
   color: white;
   transform: translateY(-2px);
+}
+
+/* Стили для блока поддержки сервера */
+.server-support {
+  margin: 30px 0;
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.server-support h3 {
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.iframe-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.iframe-container iframe {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 600px) {
+  .iframe-container iframe {
+    width: 100% !important;
+    max-width: 400px;
+  }
+  
+  .server-support {
+    margin: 20px 10px;
+    padding: 15px;
+  }
 }
 
 /* Background Animation */
