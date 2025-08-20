@@ -85,16 +85,8 @@
           </div>
         </form>
         
-        <!-- Rate Limit ошибка -->
-        <RateLimitError 
-          v-if="rateLimitError" 
-          :error="rateLimitError"
-          :is-authenticated="isAuthenticated"
-          @countdown-finished="onCountdownFinished"
-        />
-        
-        <!-- Обычная ошибка -->
-        <div v-if="error && !rateLimitError" class="error-message">
+        <!-- Ошибка -->
+        <div v-if="error" class="error-message">
           <strong>Ошибка:</strong> {{ error }}
         </div>
       </main>
@@ -112,19 +104,14 @@
 </template>
 
 <script>
-import RateLimitError from '@/components/RateLimitError.vue'
-
 export default {
   name: 'MathGenerator',
-  components: {
-    RateLimitError
-  },
   data() {
     return {
       isDark: false,
       loading: false,
       error: null,
-      rateLimitError: null,
+
       formData: {
         numOperands: 2,
         operations: ['+'],
@@ -141,9 +128,7 @@ export default {
     logoSrc() {
       return this.isDark ? require('../assets/logo_dark.png') : require('../assets/logo.png')
     },
-    isAuthenticated() {
-      return this.$store.getters['auth/isAuthenticated']
-    }
+
   },
   methods: {
     toggleTheme() {
@@ -175,30 +160,20 @@ export default {
       
       this.loading = true
       this.error = null
-      this.rateLimitError = null
       
       try {
         const formData = new FormData()
         formData.append('num_operands', this.formData.numOperands)
-        this.formData.operations.forEach(op => formData.append('operation', op))
+        this.formData.operations.forEach(op => formData.append('operations', op))
         formData.append('interval_start', this.formData.intervalStart)
         formData.append('interval_end', this.formData.intervalEnd)
         formData.append('example_count', this.formData.exampleCount)
         
-        const response = await this.$store.state.auth.token
-          ? await fetch('http://localhost:8000/api/math-generator', {
-              method: 'POST',
-              body: formData,
-              credentials: 'include',
-              headers: {
-                'Authorization': `Bearer ${this.$store.state.auth.token}`
-              }
-            })
-          : await fetch('http://localhost:8000/api/math-generator', {
-              method: 'POST',
-              body: formData,
-              credentials: 'include'
-            })
+        const response = await fetch('http://localhost:8000/api/math-generator', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        })
         
         if (response.ok) {
           const blob = await response.blob()
@@ -212,25 +187,12 @@ export default {
           link.click()
           link.remove()
           
-          // Сохраняем данные для страницы результата
-          localStorage.setItem('lastResult', JSON.stringify({
-            type: 'math',
-            fileName: 'математические_примеры.pdf',
-            description: `Сгенерировано ${this.formData.exampleCount} примеров с операциями: ${this.formData.operations.join(', ')}`,
-            downloaded: true
-          }))
-          
-          // Переходим на страницу результата
-          this.$router.push('/result')
+          // Показываем сообщение об успехе
+          this.error = null
         } else {
           const errorData = await response.json()
           
-          // Проверяем, является ли это rate limit ошибкой
-          if (response.status === 429 && errorData.code === 'RATE_LIMIT_EXCEEDED') {
-            this.rateLimitError = errorData
-          } else {
-            this.error = errorData.detail || errorData.error || 'Ошибка генерации PDF'
-          }
+          this.error = errorData.detail || errorData.error || 'Ошибка генерации PDF'
         }
       } catch (err) {
         this.error = 'Ошибка соединения с сервером'
@@ -239,13 +201,7 @@ export default {
       }
     },
     
-    onCountdownFinished() {
-      // Сбрасываем rate limit ошибку когда таймер закончился
-      this.rateLimitError = null
-      
-      // Можно показать уведомление что лимит сброшен
-      console.log('Rate limit сброшен, можно генерировать снова!')
-    }
+
   }
 }
 </script>

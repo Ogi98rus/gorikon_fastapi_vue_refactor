@@ -1,8 +1,5 @@
 import { createStore } from 'vuex'
-import authModule from './modules/auth'
-import analyticsModule from './modules/analytics'
 import i18nModule from './modules/i18n'
-import historyModule from './modules/history'
 
 export default createStore({
   state: {
@@ -63,9 +60,6 @@ export default createStore({
   },
   
   modules: {
-    auth: authModule,
-    analytics: analyticsModule,
-    i18n: i18nModule,
-    history: historyModule
+    i18n: i18nModule
   }
 }) 

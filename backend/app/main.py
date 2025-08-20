@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 import logging
 import sys
 from pathlib import Path
@@ -12,13 +13,10 @@ sys.path.insert(0, str(app_dir))
 
 # Импорты приложения
 from app.core.config import settings
-from app.models.database import get_db, create_tables
-from app.middleware.security import SecurityMiddleware
 from app.middleware.i18n import I18nMiddleware
 
 # Импорт роутеров
-from app.routers import auth, analytics, i18n, security, math, ktp, test_file
-from app.routers import user_history, admin
+from app.routers import i18n, math, ktp
 from app.models.schemas import ErrorResponse
 
 # Настройка логирования
@@ -61,40 +59,24 @@ app = FastAPI(
 )
 
 # Добавляем middleware (порядок важен! Последний добавленный выполняется первым)
-# Поэтому сначала добавляем Security и I18n, а CORS в самом конце
-
-# Добавляем улучшенный security middleware
-security_middleware_instance = SecurityMiddleware(app)
-app.add_middleware(SecurityMiddleware)
-
 # Добавляем i18n middleware
 app.add_middleware(I18nMiddleware)
 
 # CORS должен быть добавлен ПОСЛЕДНИМ, чтобы выполняться ПЕРВЫМ!
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
-    allow_methods=settings.allowed_methods,
-    allow_headers=settings.allowed_headers,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 # Подключение роутеров
 app.include_router(i18n.router)      # Интернационализация
-app.include_router(auth.router)      # Аутентификация
-app.include_router(analytics.router) # Аналитика
-app.include_router(security.router)  # Безопасность
 app.include_router(math.router)      # Математический генератор
 app.include_router(ktp.router)       # КТП генератор
-app.include_router(user_history.router)  # История генераций пользователя
-app.include_router(admin.router)     # Администрирование пользователей
-
-# Legacy роутеры для совместимости
-app.include_router(math.legacy_router)  # Математический генератор (Legacy)
-app.include_router(ktp.legacy_router)   # КТП генератор (Legacy)
-
-# Инициализируем security middleware в роутере
-security.set_security_middleware(security_middleware_instance)
+app.include_router(math.legacy_router)  # Legacy математический генератор
+app.include_router(ktp.legacy_router)   # Legacy КТП генератор
 
 # Обработчики ошибок
 @app.exception_handler(HTTPException)
@@ -136,6 +118,12 @@ async def general_exception_handler(request, exc: Exception):
         content=error_response.dict()
     )
 
+# Обработка OPTIONS запросов для CORS
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """Обработчик OPTIONS запросов для CORS"""
+    return {"message": "OK"}
+
 # Основные эндпоинты
 @app.get("/", tags=["Система"])
 async def root():
@@ -155,14 +143,10 @@ async def root():
         },
         "features": [
             "🌍 Мультиязычная поддержка (5 языков)",
-            "👤 Система аутентификации пользователей",
-            "📊 Аналитика и статистика использования",
-            "🔒 Многоуровневая система безопасности",
             "🧮 Математические примеры с настраиваемыми параметрами",
             "📅 Календарно-тематическое планирование", 
             "✅ Валидация входных данных",
-            "🔧 Автоматическая обработка ошибок",
-            "🏗️ Модульная архитектура"
+            "🔧 Автоматическая обработка ошибок"
         ]
     }
 
@@ -173,11 +157,7 @@ async def health_check():
         "status": "healthy",
         "version": settings.app_version,
         "components": {
-            "database": "connected",
             "i18n": "multilingual",
-            "auth": "enabled",
-            "analytics": "enabled",
-            "security": "protected",
             "generators": "ready"
         },
         "config": {
@@ -220,15 +200,8 @@ async def startup_event():
     logger.info(f"🔧 Режим отладки: {settings.debug}")
     logger.info(f"📁 Временная папка: {settings.temp_dir}")
     
-    # Инициализация базы данных
-    try:
-        create_tables()
-        logger.info("✅ База данных инициализирована")
-    except Exception as e:
-        logger.error(f"❌ Ошибка инициализации базы данных: {e}")
-    
     logger.info(f"⚙️ Настройки загружены из .env")
-    logger.info(f"🎯 Доступные функции: аутентификация, аналитика, генераторы")
+    logger.info(f"🎯 Доступные функции: генераторы примеров и КТП")
 
 # Событие остановки  
 @app.on_event("shutdown")
@@ -263,18 +236,6 @@ def custom_openapi():
         {
             "name": "Интернационализация",
             "description": "Мультиязычная поддержка и управление переводами"
-        },
-        {
-            "name": "Аутентификация",
-            "description": "Регистрация, вход и управление пользователями"
-        },
-        {
-            "name": "Аналитика",
-            "description": "Статистика использования и дашборд"
-        },
-        {
-            "name": "Безопасность",
-            "description": "Мониторинг безопасности и управление защитой"
         },
         {
             "name": "Математический генератор",

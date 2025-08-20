@@ -111,6 +111,46 @@ async def login_user(
             detail=f"Ошибка входа: {str(e)}"
         )
 
+@router.post("/login-simple", response_model=Token)
+async def login_user_simple(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Вход пользователя через простую форму
+    
+    **Параметры:**
+    - `email`: Электронная почта
+    - `password`: Пароль
+    """
+    try:
+        # Аутентификация пользователя
+        user = UserService.authenticate_user(db, email, password)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Неверный email или пароль"
+            )
+        
+        # Создаем новую сессию
+        ip_address = get_client_ip(request)
+        user_agent = get_user_agent(request)
+        session = UserService.create_user_session(db, user.id, ip_address, user_agent)
+        
+        # Возвращаем токен
+        return create_token_response(user, session.session_token)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка входа: {str(e)}"
+        )
+
 @router.post("/login-form", response_model=Token)
 async def login_user_form(
     request: Request,

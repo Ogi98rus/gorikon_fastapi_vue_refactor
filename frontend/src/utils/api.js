@@ -23,8 +23,9 @@ export async function fetchWithAuth(url, options = {}) {
     fetchOptions.headers['Authorization'] = `Bearer ${token}`
   }
   
-  // Делаем запрос
-  return fetch(url, fetchOptions)
+  // Делаем запрос к бэкенду
+  const fullUrl = url.startsWith('http') ? url : `http://localhost:8000${url}`
+  return fetch(fullUrl, fetchOptions)
 }
 
 /**

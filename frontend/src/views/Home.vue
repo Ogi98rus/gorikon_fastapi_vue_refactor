@@ -13,10 +13,10 @@
       
       <main>
         <nav class="button-group">
-          <router-link to="/math-generator" class="btn">
+          <router-link to="/math" class="btn">
             📊 Генератор Математических Примеров
           </router-link>
-          <router-link to="/ktp-generator" class="btn">
+          <router-link to="/ktp" class="btn">
             📅 Генератор Дат для КТП
           </router-link>
         </nav>

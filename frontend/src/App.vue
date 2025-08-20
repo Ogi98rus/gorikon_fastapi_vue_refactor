@@ -8,7 +8,7 @@
           <div class="nav-brand">
             <router-link to="/" class="brand-link">
               <img src="./assets/logo.png" alt="Logo" class="brand-logo" />
-              <span class="brand-text">EduGenerator</span>
+              <span class="brand-text">GORIKON</span>
             </router-link>
           </div>
 
@@ -35,14 +35,6 @@
               <router-link to="/ktp" class="nav-link" @click="closeMobileMenu">
                 📅 КТП
               </router-link>
-              <router-link
-                v-if="isAuthenticated"
-                to="/analytics"
-                class="nav-link"
-                @click="closeMobileMenu"
-              >
-                📊 Аналитика
-              </router-link>
             </div>
 
             <!-- Language Selector -->
@@ -52,57 +44,7 @@
                 <option value="en">🇺🇸 English</option>
                 <option value="kk">🇰🇿 Қазақша</option>
                 <option value="be">🇧🇾 Беларуская</option>
-                <option value="uk">🇺🇦 Українська</option>
               </select>
-            </div>
-
-            <!-- User Menu -->
-            <div class="user-menu">
-              <div v-if="isAuthenticated" class="user-dropdown">
-                <button class="user-toggle" @click="toggleUserDropdown">
-                  <div class="user-avatar">{{ userInitials }}</div>
-                  <span class="user-name">{{ userName }}</span>
-                  <span class="dropdown-arrow">▼</span>
-                </button>
-                
-                <div class="dropdown-menu" :class="{ 'show': isUserDropdownOpen }">
-                  <router-link to="/profile" class="dropdown-item" @click="closeUserDropdown">
-                    👤 Профиль
-                  </router-link>
-                  <router-link to="/history" class="dropdown-item" @click="closeUserDropdown">
-                    📊 История генераций
-                  </router-link>
-                  <router-link
-                    v-if="isAdmin"
-                    to="/analytics"
-                    class="dropdown-item"
-                    @click="closeUserDropdown"
-                  >
-          📊 Аналитика
-        </router-link>
-        <router-link
-          v-if="isAdmin"
-          to="/admin"
-          class="dropdown-item"
-          @click="closeUserDropdown"
-        >
-          👑 Панель администратора
-                  </router-link>
-                  <div class="dropdown-divider"></div>
-                  <button @click="handleLogout" class="dropdown-item logout-btn">
-                    🚪 Выйти
-                  </button>
-                </div>
-              </div>
-              
-              <div v-else class="auth-buttons">
-                <router-link to="/login" class="btn btn-outline" @click="closeMobileMenu">
-                  🔐 Войти
-                </router-link>
-                <router-link to="/register" class="btn btn-primary" @click="closeMobileMenu">
-                  📝 Регистрация
-                </router-link>
-              </div>
             </div>
           </div>
         </div>
@@ -111,144 +53,41 @@
 
     <!-- Main Content -->
     <main class="app-main" :class="{ 'with-header': showNavigation }">
-      <router-view @notification="showNotification" />
+      <router-view />
     </main>
-
-    <!-- Notification System -->
-    <div class="notification-container">
-      <transition-group name="notification" tag="div">
-        <div
-          v-for="notification in notifications"
-          :key="notification.id"
-          class="notification"
-          :class="`notification-${notification.type}`"
-        >
-          <div class="notification-content">
-            <span class="notification-icon">{{ getNotificationIcon(notification.type) }}</span>
-            <span class="notification-message">{{ notification.message }}</span>
-          </div>
-          <button
-            @click="removeNotification(notification.id)"
-            class="notification-close"
-          >
-            ✕
-          </button>
-        </div>
-      </transition-group>
-    </div>
-
-    <!-- PWA Install Banner -->
-    <div v-if="showPWAPrompt" class="pwa-banner">
-      <div class="pwa-content">
-        <div class="pwa-icon">📱</div>
-        <div class="pwa-text">
-          <h4>Установить приложение</h4>
-          <p>Добавьте EduGenerator на главный экран для быстрого доступа</p>
-        </div>
-        <div class="pwa-actions">
-          <button @click="installPWA" class="btn btn-primary">
-            📥 Установить
-          </button>
-          <button @click="dismissPWAPrompt" class="btn btn-outline">
-            ✕ Отклонить
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div v-if="isGlobalLoading" class="loading-overlay">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Загрузка...</p>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'App',
   
   data() {
     return {
       isMobileMenuOpen: false,
-      isUserDropdownOpen: false,
-      notifications: [],
-      notificationIdCounter: 0,
-      selectedLanguage: 'ru',
-      
-      // PWA
-      showPWAPrompt: false,
-      deferredPrompt: null
+      selectedLanguage: 'ru'
     }
   },
 
   computed: {
-    ...mapGetters('auth', ['isAuthenticated', 'user', 'isAdmin']),
-    ...mapGetters(['isLoading']),
-
     showNavigation() {
-      // Скрываем навигацию на страницах аутентификации
-      const authPages = ['Login', 'Register']
-      return !authPages.includes(this.$route.name)
-    },
-
-    isGlobalLoading() {
-      return this.isLoading
-    },
-
-    userName() {
-      return this.user?.full_name || 'Пользователь'
-    },
-
-    userInitials() {
-      if (!this.user?.full_name) return '👤'
-      return this.user.full_name
-        .split(' ')
-        .map(name => name.charAt(0))
-        .join('')
-        .substring(0, 2)
-        .toUpperCase()
+      return true
     }
   },
 
-  async mounted() {
-    // Инициализация аутентификации
-    await this.initializeAuth()
-    
+  mounted() {
     // Инициализация языка
     this.initializeLanguage()
-    
-    // Инициализация PWA
-    this.initializePWA()
-    
-    // Обработка кликов вне выпадающих меню
-    document.addEventListener('click', this.handleOutsideClick)
     
     // Обработка изменения размера экрана
     window.addEventListener('resize', this.handleResize)
   },
 
   beforeUnmount() {
-    document.removeEventListener('click', this.handleOutsideClick)
     window.removeEventListener('resize', this.handleResize)
   },
 
   methods: {
-    ...mapActions('auth', ['initAuth', 'logout']),
-    ...mapActions(['setLoading']),
-
-    async initializeAuth() {
-      try {
-        await this.initAuth()
-      } catch (error) {
-        console.log('Auth initialization failed:', error)
-      }
-    },
-
     initializeLanguage() {
       // Получаем сохраненный язык или используем язык браузера
       const savedLanguage = localStorage.getItem('selected_language')
@@ -260,45 +99,12 @@ export default {
       this.changeLanguage()
     },
 
-    initializePWA() {
-      // Обработка события beforeinstallprompt
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault()
-        this.deferredPrompt = e
-        
-        // Показываем баннер установки через некоторое время
-        setTimeout(() => {
-          if (!localStorage.getItem('pwa_dismissed')) {
-            this.showPWAPrompt = true
-          }
-        }, 5000)
-      })
-
-      // Обработка установки PWA
-      window.addEventListener('appinstalled', () => {
-        this.showPWAPrompt = false
-        this.showNotification({ message: 'Приложение успешно установлено!', type: 'success' })
-      })
-    },
-
-    async changeLanguage() {
-      try {
-        // Сохраняем выбранный язык
-        localStorage.setItem('selected_language', this.selectedLanguage)
-        
-        // Отправляем в backend для установки языка сессии
-        if (this.isAuthenticated) {
-          await this.$http.post('/api/i18n/set-language', {
-            language: this.selectedLanguage
-          })
-        }
-        
-        // Обновляем переводы (когда будет реализована i18n система)
-        this.$emit('language-changed', this.selectedLanguage)
-        
-      } catch (error) {
-        console.error('Language change failed:', error)
-      }
+    changeLanguage() {
+      // Сохраняем выбранный язык
+      localStorage.setItem('selected_language', this.selectedLanguage)
+      
+      // Обновляем переводы (когда будет реализована i18n система)
+      this.$emit('language-changed', this.selectedLanguage)
     },
 
     toggleMobileMenu() {
@@ -309,93 +115,11 @@ export default {
       this.isMobileMenuOpen = false
     },
 
-    toggleUserDropdown() {
-      this.isUserDropdownOpen = !this.isUserDropdownOpen
-    },
-
-    closeUserDropdown() {
-      this.isUserDropdownOpen = false
-      this.closeMobileMenu()
-    },
-
-    handleOutsideClick(event) {
-      // Закрываем выпадающие меню при клике вне их
-      if (!event.target.closest('.user-dropdown')) {
-        this.isUserDropdownOpen = false
-      }
-      if (!event.target.closest('.nav-menu') && !event.target.closest('.mobile-menu-toggle')) {
-        this.isMobileMenuOpen = false
-      }
-    },
-
     handleResize() {
       // Закрываем мобильное меню при изменении размера экрана
       if (window.innerWidth > 768) {
         this.isMobileMenuOpen = false
       }
-    },
-
-    async handleLogout() {
-      try {
-        await this.logout()
-        this.$router.push('/')
-        this.closeUserDropdown()
-        this.showNotification({ message: 'Вы успешно вышли из системы', type: 'info' })
-      } catch (error) {
-        console.error('Logout error:', error)
-        this.showNotification({ message: 'Ошибка при выходе из системы', type: 'error' })
-      }
-    },
-
-    async installPWA() {
-      if (this.deferredPrompt) {
-        this.deferredPrompt.prompt()
-        const { outcome } = await this.deferredPrompt.userChoice
-        
-        if (outcome === 'accepted') {
-          this.showPWAPrompt = false
-        }
-        
-        this.deferredPrompt = null
-      }
-    },
-
-    dismissPWAPrompt() {
-      this.showPWAPrompt = false
-      localStorage.setItem('pwa_dismissed', 'true')
-    },
-
-    showNotification(notification) {
-      const id = ++this.notificationIdCounter
-      const notificationObj = {
-        id,
-        message: notification.message,
-        type: notification.type || 'info'
-      }
-      
-      this.notifications.push(notificationObj)
-      
-      // Автоматически удаляем уведомление через 5 секунд
-      setTimeout(() => {
-        this.removeNotification(id)
-      }, 5000)
-    },
-
-    removeNotification(id) {
-      const index = this.notifications.findIndex(n => n.id === id)
-      if (index > -1) {
-        this.notifications.splice(index, 1)
-      }
-    },
-
-    getNotificationIcon(type) {
-      const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-      }
-      return icons[type] || icons.info
     }
   }
 }

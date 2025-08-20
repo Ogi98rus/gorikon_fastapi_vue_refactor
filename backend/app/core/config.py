@@ -15,19 +15,7 @@ class Settings(BaseSettings):
     allowed_methods: List[str] = ["*"]
     allowed_headers: List[str] = ["*"]
     
-    # База данных MySQL (единственная поддерживаемая)
-    mysql_host: str = "mysql"  # Имя сервиса в docker-compose
-    mysql_port: int = 3306
-    mysql_user: str = "generator_user"
-    mysql_password: str = "generator_password"
-    mysql_database: str = "generator_db"
-
-    
-    # JWT настройки (для аутентификации)
-    secret_key: str = "your-secret-key-change-in-production"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 1440  # 24 часа для разработки
-    refresh_token_expire_days: int = 30
+    # Настройки файлов
     
     # Настройки файлов
     max_file_size: int = 50 * 1024 * 1024  # 50MB
@@ -47,23 +35,10 @@ class Settings(BaseSettings):
     max_lessons_per_day: int = 15
     
     # Дополнительные настройки
-    enable_analytics: bool = True
-    enable_user_registration: bool = True
-    email_from: str = "noreply@generator.localhost"
-    email_smtp_host: str = "smtp.gmail.com"
-    email_smtp_port: int = 587
     
 
 
-    @property
-    def database_url(self) -> str:
-        """Получить URL для подключения к MySQL"""
-        # Приоритет: переменная окружения DATABASE_URL, затем сборка из параметров MySQL
-        env_url = os.getenv("DATABASE_URL")
-        if env_url:
-            return env_url
-        
-        return f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
+
 
     model_config = {
         "case_sensitive": False,
