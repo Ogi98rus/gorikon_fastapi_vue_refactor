@@ -9,4 +9,4 @@ Allow: /ktp-generator
 Disallow: /result
 
 # Ссылка на карту сайта
-Sitemap: https://generator.gorikon.ru/sitemap.xml 
+Sitemap: https://gorikon.ru/sitemap.xml 

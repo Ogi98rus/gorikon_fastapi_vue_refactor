@@ -6,7 +6,7 @@
   
   <!-- Главная страница -->
   <url>
-    <loc>https://generator.gorikon.ru/</loc>
+    <loc>https://gorikon.ru/</loc>
     <lastmod>2025-01-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
   
   <!-- Генератор математических примеров -->
   <url>
-    <loc>https://generator.gorikon.ru/math-generator</loc>
+    <loc>https://gorikon.ru/math</loc>
     <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
   
   <!-- Генератор календарно-тематического планирования -->
   <url>
-    <loc>https://generator.gorikon.ru/ktp-generator</loc>
+    <loc>https://gorikon.ru/ktp</loc>
     <lastmod>2025-01-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>

@@ -110,7 +110,7 @@ const BASE_TRANSLATIONS = {
     'math.cancelButton': 'Отмена',
     'math.downloadBoth': 'Скачать оба варианта',
     'math.downloadBothHint': 'Скачать PDF для ученика и учителя',
-    'common.serverSupport': 'Серверу необходимо регулярно кушать электричество',
+            'common.serverSupport': 'Поддержать проект',
     
     // КТП генератор
     'ktp.title': 'Генератор для КТП',
@@ -269,7 +269,7 @@ const BASE_TRANSLATIONS = {
     'math.cancelButton': 'Cancel',
     'math.downloadBoth': 'Download Both',
     'math.downloadBothHint': 'Download PDF for student and teacher',
-    'common.serverSupport': 'Server needs regular electricity to keep running',
+            'common.serverSupport': 'Support the project',
     
     // LTP Generator
     'ktp.title': 'LTP Generator',

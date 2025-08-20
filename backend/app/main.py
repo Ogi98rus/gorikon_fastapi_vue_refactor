@@ -223,7 +223,7 @@ def custom_openapi():
     # Добавляем дополнительную информацию
     openapi_schema["info"]["contact"] = {
         "name": "Команда разработки",
-        "url": "https://generator.gorikon.ru",
+        "url": "https://gorikon.ru",
     }
     
     openapi_schema["info"]["license"] = {
