@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import MathGenerator from '../views/MathGenerator.vue'
 import KtpGenerator from '../views/KtpGenerator.vue'
+import MathGame from '../views/MathGame.vue'
 
 const routes = [
   {
@@ -29,6 +30,15 @@ const routes = [
     meta: {
       title: 'Генератор КТП',
       description: 'Создание календарно-тематического планирования'
+    }
+  },
+  {
+    path: '/math-game',
+    name: 'MathGame',
+    component: MathGame,
+    meta: {
+      title: 'Математическая игра - Развитие навыков',
+      description: 'Увлекательная игра для развития математических способностей с настраиваемыми параметрами'
     }
   },
 

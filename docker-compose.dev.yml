@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: generator-backend-dev
+    ports:
+      - "8000:8000"  # Прямой доступ к backend
+    environment:
+      - DEBUG=true
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend:/app  # Монтируем код для hot reload
+      - ./generated_files:/app/generated_files
+      - /app/__pycache__  # Исключаем кэш Python
+    networks:
+      - dev-network
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: generator-frontend-dev
+    ports:
+      - "8080:80"  # Прямой доступ к frontend
+    volumes:
+      - ./frontend:/app  # Монтируем код для hot reload
+      - /app/node_modules  # Исключаем node_modules
+    networks:
+      - dev-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=development
+      - VUE_APP_API_URL=http://localhost:8000
+
+networks:
+  dev-network:
+    external: false
+
+volumes:
+  generated_files:
+    driver: local

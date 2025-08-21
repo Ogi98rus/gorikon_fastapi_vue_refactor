@@ -2,11 +2,15 @@ User-agent: *
 Allow: /
 
 # Основные страницы
+Allow: /
 Allow: /math-generator
 Allow: /ktp-generator
+Allow: /math-game
 
-# Исключаем технические страницы
-Disallow: /result
+# Запрещаем доступ к API документации в продакшене
+Disallow: /api/docs
+Disallow: /api/redoc
+Disallow: /api/openapi.json
 
-# Ссылка на карту сайта
+# Sitemap
 Sitemap: https://gorikon.ru/sitemap.xml 

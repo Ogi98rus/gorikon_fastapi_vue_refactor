@@ -16,6 +16,9 @@
           <router-link to="/ktp" class="btn">
             {{ $t('home.ktpGenerator') }}
           </router-link>
+          <router-link to="/math-game" class="btn btn-game">
+             {{ $t('home.mathGame') || 'Математическая игра' }}
+          </router-link>
         </nav>
       </main>
       

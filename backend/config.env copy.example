@@ -3,17 +3,6 @@ APP_NAME="Генератор учебных материалов"
 APP_VERSION="2.0.0"
 DEBUG=false
 
-# База данных MySQL (единственная поддерживаемая)
-# Можно использовать либо готовый URL, либо отдельные параметры
-DATABASE_URL="mysql+pymysql://generator_user:generator_password@mysql:3306/generator_db"
-
-# Или через отдельные параметры (используются если DATABASE_URL не задан)
-MYSQL_HOST="mysql"
-MYSQL_PORT=3306
-MYSQL_USER="generator_user"
-MYSQL_PASSWORD="generator_password"
-MYSQL_DATABASE="generator_db"
-
 # JWT настройки
 SECRET_KEY="your-super-secret-jwt-key-change-this-in-production"
 ALGORITHM="HS256"
@@ -39,11 +28,6 @@ MAX_LESSONS_PER_DAY=15
 # Дополнительные настройки
 ENABLE_ANALYTICS=true
 ENABLE_USER_REGISTRATION=true
-
-# Email настройки (для будущего использования)
-EMAIL_FROM="noreply@generator.localhost"
-EMAIL_SMTP_HOST="smtp.gmail.com"
-EMAIL_SMTP_PORT=587 
 
 # CORS настройки
 ALLOWED_ORIGINS=["*"]

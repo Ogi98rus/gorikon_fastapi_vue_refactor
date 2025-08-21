@@ -89,6 +89,18 @@
           "sizes": "96x96"
         }
       ]
+    },
+    {
+      "name": "Математическая игра",
+      "short_name": "Игра",
+      "description": "Играть в математическую игру",
+      "url": "/math-game",
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "screenshots": [

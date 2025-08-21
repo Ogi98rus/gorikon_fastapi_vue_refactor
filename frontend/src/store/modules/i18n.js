@@ -48,6 +48,7 @@ const BASE_TRANSLATIONS = {
     'nav.home': 'Главная',
     'nav.math': 'Математика',
     'nav.ktp': 'КТП',
+    'nav.mathGame': 'Примеры онлайн',
     'nav.analytics': 'Аналитика',
     'nav.profile': 'Профиль',
     'nav.login': 'Войти',
@@ -69,6 +70,7 @@ const BASE_TRANSLATIONS = {
     'home.title': 'ВЫБЕРИТЕ ГЕНЕРАТОР',
     'home.mathGenerator': '📊 Генератор Математических Примеров',
     'home.ktpGenerator': '📅 Генератор Дат для КТП',
+    'home.mathGame': '🎮 Примеры онлайн',
     'home.advice': 'Совет: Выберите нужный генератор выше для создания учебных материалов.',
     
     // Математический генератор
@@ -207,6 +209,7 @@ const BASE_TRANSLATIONS = {
     'nav.home': 'Home',
     'nav.math': 'Math',
     'nav.ktp': 'LTP',
+    'nav.mathGame': 'Online Examples',
     'nav.analytics': 'Analytics',
     'nav.profile': 'Profile',
     'nav.login': 'Login',
@@ -228,6 +231,7 @@ const BASE_TRANSLATIONS = {
     'home.title': 'SELECT GENERATOR',
     'home.mathGenerator': '📊 Math Problems Generator',
     'home.ktpGenerator': '📅 LTP Date Generator',
+    'home.mathGame': '🎮 Online Examples',
     'home.advice': 'Tip: Select the generator above to create educational materials.',
     
     // Math Generator

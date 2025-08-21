@@ -45,6 +45,9 @@
               <router-link to="/ktp" class="nav-link" @click="closeMobileMenu">
                 📅 {{ $t('nav.ktp') }}
               </router-link>
+              <router-link to="/math-game" class="nav-link" @click="closeMobileMenu">
+                🎮 {{ $t('nav.mathGame') || 'Примеры онлайн' }}
+              </router-link>
             </div>
 
             <!-- Language Selector -->

@@ -1,42 +1,44 @@
-import store from '@/store'
-
 /**
- * Обертка над fetch с автоматической подстановкой токена авторизации
+ * Простая обертка над fetch для API запросов
  */
-export async function fetchWithAuth(url, options = {}) {
-  // Получаем токен из store
-  const token = store.state.auth.token
-  
+export async function fetchApi(url, options = {}) {
   // Создаем копию опций чтобы не мутировать оригинал
   const fetchOptions = { ...options }
-  
-  // Добавляем CORS настройки
-  fetchOptions.credentials = 'include'
   
   // Инициализируем headers если их нет
   if (!fetchOptions.headers) {
     fetchOptions.headers = {}
   }
   
-  // Добавляем токен если он есть
-  if (token) {
-    fetchOptions.headers['Authorization'] = `Bearer ${token}`
+  // Устанавливаем Content-Type для JSON если есть body
+  if (fetchOptions.body && !fetchOptions.headers['Content-Type']) {
+    fetchOptions.headers['Content-Type'] = 'application/json'
   }
   
-  // Делаем запрос к бэкенду
-  // Используем относительные URL для работы с прокси
-  const fullUrl = url.startsWith('http') ? url : url
-  return fetch(fullUrl, fetchOptions)
+  // Делаем запрос к API
+  return fetch(url, fetchOptions)
 }
 
 /**
- * API методы с авторизацией
+ * API методы без авторизации
  */
 export const api = {
-  get: (url, options = {}) => fetchWithAuth(url, { ...options, method: 'GET' }),
-  post: (url, body, options = {}) => fetchWithAuth(url, { ...options, method: 'POST', body }),
-  put: (url, body, options = {}) => fetchWithAuth(url, { ...options, method: 'PUT', body }),
-  delete: (url, options = {}) => fetchWithAuth(url, { ...options, method: 'DELETE' })
+  get: (url, options = {}) => fetchApi(url, { ...options, method: 'GET' }),
+  post: (url, body, options = {}) => {
+    const fetchOptions = { ...options, method: 'POST' }
+    if (body) {
+      fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body)
+    }
+    return fetchApi(url, fetchOptions)
+  },
+  put: (url, body, options = {}) => {
+    const fetchOptions = { ...options, method: 'PUT' }
+    if (body) {
+      fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body)
+    }
+    return fetchApi(url, fetchOptions)
+  },
+  delete: (url, options = {}) => fetchApi(url, { ...options, method: 'DELETE' })
 }
 
 export default api 
