@@ -6,9 +6,24 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     
     <!-- Основные мета-теги -->
-    <meta name="description" content="Генератор математических примеров и календарно-тематического планирования для учителей">
+    <meta name="description" content="Генератор математических примеров и календарно-тематического планирования для учителей. Создавайте примеры, КТП и играйте в математическую игру для развития навыков">
     <meta name="author" content="Команда разработки">
-    <meta name="keywords" content="генератор, математика, КТП, планирование, образование, учителя">
+    <meta name="keywords" content="генератор, математика, КТП, планирование, образование, учителя, математическая игра, примеры, обучение">
+    
+    <!-- Open Graph мета-теги -->
+    <meta property="og:title" content="Генератор учебных материалов - Математика и КТП">
+    <meta property="og:description" content="Создавайте математические примеры, календарно-тематическое планирование и играйте в математическую игру для развития навыков">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gorikon.ru">
+    <meta property="og:image" content="https://gorikon.ru/og-image.jpg">
+    <meta property="og:site_name" content="Горикон - Учебные материалы">
+    <meta property="og:locale" content="ru_RU">
+    
+    <!-- Twitter Card мета-теги -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Генератор учебных материалов">
+    <meta name="twitter:description" content="Создавайте математические примеры и КТП для учителей">
+    <meta name="twitter:image" content="https://gorikon.ru/twitter-image.jpg">
     
     <!-- PWA мета-теги -->
     <meta name="theme-color" content="#2196F3">
@@ -27,12 +42,40 @@
     <!-- PWA манифест -->
     <link rel="manifest" href="<%= BASE_URL %>manifest.json">
     
-    <title>Генератор учебных материалов</title>
+    <title>Генератор учебных материалов - Математика и КТП | Горикон</title>
   </head>
   <body>
     <noscript>
       <strong>К сожалению, это приложение не работает без JavaScript. Пожалуйста, включите его для продолжения.</strong>
     </noscript>
+    
+    <!-- Schema.org разметка -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Генератор учебных материалов",
+      "description": "Инструмент для создания математических примеров, календарно-тематического планирования и математической игры",
+      "url": "https://gorikon.ru",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Команда разработки Горикон"
+      },
+      "featureList": [
+        "Генератор математических примеров",
+        "Календарно-тематическое планирование",
+        "Математическая игра для развития навыков"
+      ]
+    }
+    </script>
+    
     <div id="app"></div>
     
     <!-- Service Worker -->

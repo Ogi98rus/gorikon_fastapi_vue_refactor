@@ -15,7 +15,7 @@ from app.core.config import settings
 from app.middleware.i18n import I18nMiddleware
 
 # Импорт роутеров
-from app.routers import i18n, math, ktp
+from app.routers import i18n, math, ktp, math_game
 from app.models.schemas import ErrorResponse
 
 # Настройка логирования
@@ -81,6 +81,7 @@ app.add_middleware(
 app.include_router(i18n.router)      # Интернационализация
 app.include_router(math.router)      # Математический генератор
 app.include_router(ktp.router)       # КТП генератор
+app.include_router(math_game.router) # Математическая игра
 app.include_router(math.legacy_router)  # Legacy математический генератор
 app.include_router(ktp.legacy_router)   # Legacy КТП генератор
 
