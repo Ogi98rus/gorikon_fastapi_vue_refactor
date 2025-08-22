@@ -300,10 +300,10 @@ export default {
       
       // Устанавливаем примерные даты учебного года
       this.formData.startDate = `${currentYear}-09-01`
-      this.formData.endDate = `${currentYear + 1}-05-31`
+      this.formData.endDate = `${currentYear + 1}-05-26`
       
       // Правильные каникулы 2025-2026
-      this.formData.autumnStart = `${currentYear}-10-20`
+      this.formData.autumnStart = `${currentYear}-10-25`
       this.formData.autumnEnd = `${currentYear}-11-02`
       this.formData.winterStart = `${currentYear}-12-31`
       this.formData.winterEnd = `${currentYear + 1}-01-11`
@@ -311,8 +311,8 @@ export default {
       this.formData.springEnd = `${currentYear + 1}-04-05`
       
       // Дополнительные каникулы для 1 классов (обычно в феврале)
-      this.formData.firstGradeStart = `${currentYear + 1}-02-14`
-      this.formData.firstGradeEnd = `${currentYear + 1}-02-20`
+      this.formData.firstGradeStart = `${currentYear + 1}-02-16`
+      this.formData.firstGradeEnd = `${currentYear + 1}-02-22`
     },
     formatDateForBackend(dateStr) {
       if (!dateStr) return ''
