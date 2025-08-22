@@ -32,15 +32,29 @@
     <meta name="apple-mobile-web-app-title" content="УчМатериалы">
     <meta name="mobile-web-app-capable" content="yes">
     
+    <!-- Дополнительные мета-теги для favicon -->
+    <meta name="msapplication-TileColor" content="#2196F3">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
     <!-- Иконки -->
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <link rel="apple-touch-icon" href="<%= BASE_URL %>icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="<%= BASE_URL %>icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="<%= BASE_URL %>icons/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="128x128" href="<%= BASE_URL %>icons/icon-128x128.png">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" sizes="32x32" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" sizes="16x16" type="image/x-icon">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128x128.png">
     
     <!-- PWA манифест -->
     <link rel="manifest" href="<%= BASE_URL %>manifest.json">
+    
+    <!-- Yandex.RTB -->
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
     
     <title>Генератор учебных материалов - Математика и КТП | Горикон</title>
   </head>
@@ -91,6 +105,17 @@
             });
         });
       }
+    </script>
+    
+    <!-- Yandex.RTB R-A-16905489-1 -->
+    <div id="yandex_rtb_R-A-16905489-1"></div>
+    <script>
+    window.yaContextCb.push(() => {
+        Ya.Context.AdvManager.render({
+            "blockId": "R-A-16905489-1",
+            "renderTo": "yandex_rtb_R-A-16905489-1"
+        })
+    })
     </script>
     
     <!-- built files will be auto injected -->
