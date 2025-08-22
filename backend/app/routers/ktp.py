@@ -44,11 +44,13 @@ def generate_schedule(start_date, end_date, weekdays, lessons_per_day, holidays,
             date_str = current_date.strftime('%d.%m.%Y')
             if date_str not in holidays and date_str not in vacation_dates:
                 # Добавляем дату в расписание столько раз, сколько уроков в этот день
-                lessons_count = lessons_per_day[current_date.weekday()]
-                for _ in range(lessons_count):
-                    schedule.append({
-                        'date': format_date(current_date)
-                    })
+                weekday_index = current_date.weekday()
+                if weekday_index < len(lessons_per_day):
+                    lessons_count = lessons_per_day[weekday_index]
+                    for _ in range(lessons_count):
+                        schedule.append({
+                            'date': format_date(current_date)
+                        })
         
         current_date += timedelta(days=1)
     

@@ -62,7 +62,7 @@
             :placeholder="$t('ktp.holidaysPlaceholder')"
           >
           <div class="example">
-            <strong>{{ $t('common.example') }}:</strong> <span class="example-red">{{ $t('ktp.holidaysExample') }} 08.03.2025,01.05.2025,09.05.2025</span>
+            <strong>{{ $t('common.example') }}:</strong> <span class="example-red">{{ $t('ktp.holidaysExample') }} 04.11.2025,23.02.2026,09.03.2026,11.05.2026</span>
           </div>
           
           <label for="autumn_start">{{ $t('ktp.autumnStart') }}</label>
@@ -167,7 +167,6 @@
       <footer>
         <div class="hint">
           <h3>{{ $t('ktp.importantNote') }}</h3>
-          <p><span class="example-green">{{ $t('ktp.workdayTransfer') }}</span></p>
           <p>{{ $t('ktp.workdayTransferHint') }}</p>
         </div>
         
@@ -288,7 +287,7 @@ export default {
       this.weekDays = [
         this.$t('ktp.weekdayMonday'),
         this.$t('ktp.weekdayTuesday'),
-        this.$t('ktp.weekdayTuesday'),
+        this.$t('ktp.weekdayWednesday'),
         this.$t('ktp.weekdayThursday'),
         this.$t('ktp.weekdayFriday'),
         this.$t('ktp.weekdaySaturday'),
@@ -303,13 +302,13 @@ export default {
       this.formData.startDate = `${currentYear}-09-01`
       this.formData.endDate = `${currentYear + 1}-05-31`
       
-      // Примерные каникулы
-      this.formData.autumnStart = `${currentYear}-10-26`
-      this.formData.autumnEnd = `${currentYear}-11-03`
-      this.formData.winterStart = `${currentYear}-12-25`
-      this.formData.winterEnd = `${currentYear + 1}-01-08`
-      this.formData.springStart = `${currentYear + 1}-03-25`
-      this.formData.springEnd = `${currentYear + 1}-04-02`
+      // Правильные каникулы 2025-2026
+      this.formData.autumnStart = `${currentYear}-10-20`
+      this.formData.autumnEnd = `${currentYear}-11-02`
+      this.formData.winterStart = `${currentYear}-12-31`
+      this.formData.winterEnd = `${currentYear + 1}-01-11`
+      this.formData.springStart = `${currentYear + 1}-03-28`
+      this.formData.springEnd = `${currentYear + 1}-04-05`
       
       // Дополнительные каникулы для 1 классов (обычно в феврале)
       this.formData.firstGradeStart = `${currentYear + 1}-02-14`
