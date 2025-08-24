@@ -607,31 +607,3 @@ input, select, textarea {
   }
 }
 
-/* ============= КОНТЕЙНЕР РЕКЛАМЫ ============= */
-.advertisement-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 20px;
-  text-align: center;
-}
-
-.advertisement-container #yandex_rtb_R-A-16924544-1 {
-  display: inline-block;
-  margin: 0 auto;
-}
-
-/* Адаптивность для рекламы */
-@media (max-width: 768px) {
-  .advertisement-container {
-    padding: 0 15px;
-    margin: 15px auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .advertisement-container {
-    padding: 0 10px;
-    margin: 10px auto;
-  }
-}
