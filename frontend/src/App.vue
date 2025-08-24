@@ -66,7 +66,14 @@
     <main class="app-main" :class="{ 'with-header': showNavigation }">
       <router-view />
     </main>
-  </div>
+    
+    <!-- Yandex.RTB Реклама -->
+    <div class="advertisement-container">
+      <div id="yandex_rtb_R-A-16924544-1"></div>
+    </div>
+</div>
+
+
 </template>
 
 <script>
@@ -106,6 +113,9 @@ export default {
     
     // Обработка изменения размера экрана
     window.addEventListener('resize', this.handleResize)
+    
+    // Инициализация рекламы Яндекса
+    this.initializeAdvertisement()
   },
 
   beforeUnmount() {
@@ -151,6 +161,36 @@ export default {
 
     closeMobileMenu() {
       this.isMobileMenuOpen = false
+    },
+    
+    initializeAdvertisement() {
+      // Проверяем, что API Яндекса загружен
+      if (window.yaContextCb && window.Ya && window.Ya.Context) {
+        window.yaContextCb.push(() => {
+          // eslint-disable-next-line no-undef
+          Ya.Context.AdvManager.render({
+            "blockId": "R-A-16924544-1",
+            "renderTo": "yandex_rtb_R-A-16924544-1"
+          })
+        })
+      } else {
+        // Если API еще не загружен, ждем его загрузки
+        const checkYaAPI = setInterval(() => {
+          if (window.yaContextCb && window.Ya && window.Ya.Context) {
+            clearInterval(checkYaAPI)
+            window.yaContextCb.push(() => {
+              // eslint-disable-next-line no-undef
+              Ya.Context.AdvManager.render({
+                "blockId": "R-A-16924544-1",
+                "renderTo": "yandex_rtb_R-A-16924544-1"
+              })
+            })
+          }
+        }, 100)
+        
+        // Останавливаем проверку через 10 секунд
+        setTimeout(() => clearInterval(checkYaAPI), 10000)
+      }
     },
     
     toggleTheme() {
