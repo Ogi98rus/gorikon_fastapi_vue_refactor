@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'Advertisement',
+  name: 'YandexAdvertisement',
   mounted() {
     this.initializeAdvertisement()
   },

@@ -173,7 +173,7 @@
           </div>
 
           <div class="button-group">
-            <button @click="playAgain" class="btn">
+            <button @click="playAgain" class="btn">components
               🔄 Играть снова
             </button>
             <router-link to="/" class="btn btn-secondary">
