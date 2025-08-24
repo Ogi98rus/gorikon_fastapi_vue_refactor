@@ -192,6 +192,9 @@
             </iframe>
           </div>
         </div>
+        
+        <!-- Yandex.RTB Реклама -->
+        <Advertisement />
       </footer>
     </div>
   </div>
@@ -199,10 +202,14 @@
 
 <script>
 import i18nMixin from '../utils/i18n-mixin'
+import Advertisement from '../components/Advertisement.vue'
 
 export default {
   name: 'KtpGenerator',
   mixins: [i18nMixin],
+  components: {
+    Advertisement
+  },
   data() {
     return {
       isDark: false,

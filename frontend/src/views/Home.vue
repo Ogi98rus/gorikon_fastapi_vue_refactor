@@ -42,9 +42,7 @@
         </div>
         
         <!-- Yandex.RTB Реклама -->
-        <div class="advertisement-container">
-          <div id="yandex_rtb_R-A-16924544-1"></div>
-        </div>
+        <Advertisement />
       </footer>
     </div>
   </div>
@@ -52,10 +50,14 @@
 
 <script>
 import i18nMixin from '../utils/i18n-mixin'
+import Advertisement from '../components/Advertisement.vue'
 
 export default {
   name: 'HomePage',
   mixins: [i18nMixin],
+  components: {
+    Advertisement
+  },
   data() {
     return {
       isDark: false
@@ -71,8 +73,6 @@ export default {
     this.loadTheme()
     // Слушаем изменения темы через MutationObserver
     this.observeThemeChanges()
-    // Инициализация рекламы Яндекса
-    this.initializeAdvertisement()
   },
   
   beforeUnmount() {
@@ -102,36 +102,6 @@ export default {
         attributes: true,
         attributeFilter: ['data-theme']
       })
-    },
-    
-    initializeAdvertisement() {
-      // Проверяем, что API Яндекса загружен
-      if (window.yaContextCb && window.Ya && window.Ya.Context) {
-        window.yaContextCb.push(() => {
-          // eslint-disable-next-line no-undef
-          Ya.Context.AdvManager.render({
-            "blockId": "R-A-16924544-1",
-            "renderTo": "yandex_rtb_R-A-16924544-1"
-          })
-        })
-      } else {
-        // Если API еще не загружен, ждем его загрузки
-        const checkYaAPI = setInterval(() => {
-          if (window.yaContextCb && window.Ya && window.Ya.Context) {
-            clearInterval(checkYaAPI)
-            window.yaContextCb.push(() => {
-              // eslint-disable-next-line no-undef
-              Ya.Context.AdvManager.render({
-                "blockId": "R-A-16924544-1",
-                "renderTo": "yandex_rtb_R-A-16924544-1"
-              })
-            })
-          }
-        }, 100)
-        
-        // Останавливаем проверку через 10 секунд
-        setTimeout(() => clearInterval(checkYaAPI), 10000)
-      }
     }
   }
 }
@@ -203,19 +173,5 @@ footer {
   }
 }
 
-/* Стили для рекламы */
-.advertisement-container {
-  margin-top: 30px;
-  text-align: center;
-  padding: 20px;
-  border-radius: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  max-width: 600px;
-}
 
-.advertisement-container #yandex_rtb_R-A-16924544-1 {
-  display: inline-block;
-  margin: 0 auto;
-}
 </style> 

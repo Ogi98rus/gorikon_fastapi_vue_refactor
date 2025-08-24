@@ -1,4 +1,4 @@
-<template>
+нф<template>
   <div class="page-container">
     <div id="bg"></div>
     
@@ -181,6 +181,9 @@
             </router-link>
           </div>
         </div>
+        
+        <!-- Yandex.RTB Реклама -->
+        <Advertisement />
       </main>
     </div>
   </div>
@@ -189,9 +192,13 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '@/utils/api'
+import Advertisement from '@/components/Advertisement.vue'
 
 export default {
   name: 'MathGame',
+  components: {
+    Advertisement
+  },
   setup() {
     
     // Состояние игры
