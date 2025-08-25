@@ -1,180 +1,131 @@
-import redis
+import aioredis
 import json
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
 import logging
+from typing import Optional, Any, Dict
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 class RedisService:
     """Сервис для работы с Redis"""
     
-    def __init__(self, host: str = "redis", port: int = 6379, db: int = 0):
-        self.redis_client = redis.Redis(
-            host=host,
-            port=port,
-            db=db,
-            decode_responses=True,
-            socket_connect_timeout=5,
-            socket_timeout=5,
-            retry_on_timeout=True
-        )
-        self._test_connection()
+    def __init__(self):
+        self.redis: Optional[aioredis.Redis] = None
+        self.redis_url = getattr(settings, 'REDIS_URL', 'redis://localhost:6379')
     
-    def _test_connection(self):
-        """Тестируем подключение к Redis"""
+    async def connect(self):
+        """Подключение к Redis"""
         try:
-            self.redis_client.ping()
-            logger.info("✅ Redis подключение успешно")
-        except redis.ConnectionError as e:
+            self.redis = await aioredis.from_url(
+                self.redis_url,
+                encoding="utf-8",
+                decode_responses=True,
+                max_connections=20
+            )
+            await self.redis.ping()
+            logger.info("✅ Подключение к Redis установлено")
+        except Exception as e:
             logger.error(f"❌ Ошибка подключения к Redis: {e}")
-            # Fallback к in-memory хранилищу
-            self.redis_client = None
+            self.redis = None
     
-    def is_available(self) -> bool:
-        """Проверяем доступность Redis"""
-        if not self.redis_client:
+    async def disconnect(self):
+        """Отключение от Redis"""
+        if self.redis:
+            await self.redis.close()
+            logger.info("🔌 Отключение от Redis")
+    
+    async def set_cache(self, key: str, value: Any, expire: int = 3600) -> bool:
+        """Установка значения в кеш"""
+        if not self.redis:
             return False
+        
         try:
-            self.redis_client.ping()
+            if isinstance(value, (dict, list)):
+                value = json.dumps(value, ensure_ascii=False)
+            await self.redis.set(key, value, ex=expire)
             return True
-        except:
+        except Exception as e:
+            logger.error(f"❌ Ошибка установки кеша: {e}")
             return False
     
-    def increment_rate_limit(self, key: str, window_minutes: int = 1) -> Dict[str, Any]:
-        """
-        Увеличиваем счетчик rate limit для ключа
-        
-        Args:
-            key: Ключ для rate limit (например, "ip:192.168.1.1:path:/api/ktp-generator")
-            window_minutes: Окно времени в минутах
-            
-        Returns:
-            Dict с информацией о текущем состоянии rate limit
-        """
-        if not self.is_available():
-            return {"error": "Redis недоступен"}
+    async def get_cache(self, key: str) -> Optional[Any]:
+        """Получение значения из кеша"""
+        if not self.redis:
+            return None
         
         try:
-            now = datetime.utcnow()
-            window_start = now - timedelta(minutes=window_minutes)
-            
-            # Создаем ключ с временной меткой
-            current_minute = now.strftime("%Y-%m-%dT%H:%M")
-            redis_key = f"rate_limit:{key}:{current_minute}"
-            
-            # Увеличиваем счетчик
-            current_count = self.redis_client.incr(redis_key)
-            
-            # Устанавливаем TTL для автоматической очистки
-            if current_count == 1:
-                self.redis_client.expire(redis_key, window_minutes * 60)
-            
-            # Получаем все ключи для этого IP/path в текущем окне
-            pattern = f"rate_limit:{key}:*"
-            all_keys = self.redis_client.keys(pattern)
-            
-            # Подсчитываем общее количество запросов в окне
-            total_requests = 0
-            for k in all_keys:
-                count = self.redis_client.get(k)
-                if count:
-                    total_requests += int(count)
-            
-            return {
-                "current_count": current_count,
-                "total_requests": total_requests,
-                "window_start": window_start.isoformat(),
-                "window_end": now.isoformat(),
-                "redis_key": redis_key
-            }
-            
+            value = await self.redis.get(key)
+            if value:
+                try:
+                    return json.loads(value)
+                except json.JSONDecodeError:
+                    return value
+            return None
         except Exception as e:
-            logger.error(f"Ошибка при работе с Redis rate limit: {e}")
-            return {"error": str(e)}
+            logger.error(f"❌ Ошибка получения кеша: {e}")
+            return None
     
-    def get_rate_limit_info(self, key: str, window_minutes: int = 1) -> Dict[str, Any]:
-        """
-        Получаем информацию о rate limit для ключа
-        
-        Args:
-            key: Ключ для rate limit
-            window_minutes: Окно времени в минутах
-            
-        Returns:
-            Dict с информацией о rate limit
-        """
-        if not self.is_available():
-            return {"error": "Redis недоступен"}
+    async def delete_cache(self, key: str) -> bool:
+        """Удаление значения из кеша"""
+        if not self.redis:
+            return False
         
         try:
-            now = datetime.utcnow()
-            window_start = now - timedelta(minutes=window_minutes)
-            
-            # Получаем все ключи для этого IP/path в текущем окне
-            pattern = f"rate_limit:{key}:*"
-            all_keys = self.redis_client.keys(pattern)
-            
-            # Подсчитываем общее количество запросов в окне
-            total_requests = 0
-            oldest_request = None
-            
-            for k in all_keys:
-                count = self.redis_client.get(k)
-                if count:
-                    total_requests += int(count)
-                    
-                    # Извлекаем время из ключа
-                    try:
-                        time_str = k.split(":")[-1]
-                        request_time = datetime.fromisoformat(time_str)
-                        if oldest_request is None or request_time < oldest_request:
-                            oldest_request = request_time
-                    except:
-                        pass
-            
-            return {
-                "total_requests": total_requests,
-                "window_start": window_start.isoformat(),
-                "window_end": now.isoformat(),
-                "oldest_request": oldest_request.isoformat() if oldest_request else None
-            }
-            
+            await self.redis.delete(key)
+            return True
         except Exception as e:
-            logger.error(f"Ошибка при получении информации о rate limit: {e}")
-            return {"error": str(e)}
+            logger.error(f"❌ Ошибка удаления кеша: {e}")
+            return False
     
-    def clear_rate_limit(self, key: str):
-        """Очищаем rate limit для ключа"""
-        if not self.is_available():
-            return
-        
-        try:
-            pattern = f"rate_limit:{key}:*"
-            keys = self.redis_client.keys(pattern)
-            if keys:
-                self.redis_client.delete(*keys)
-                logger.info(f"Очищен rate limit для ключа: {key}")
-        except Exception as e:
-            logger.error(f"Ошибка при очистке rate limit: {e}")
+    async def set_session(self, session_id: str, data: Dict[str, Any], expire: int = 86400) -> bool:
+        """Установка сессии пользователя"""
+        return await self.set_cache(f"session:{session_id}", data, expire)
     
-    def get_stats(self) -> Dict[str, Any]:
-        """Получаем статистику Redis"""
-        if not self.is_available():
-            return {"error": "Redis недоступен"}
+    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Получение сессии пользователя"""
+        return await self.get_cache(f"session:{session_id}")
+    
+    async def delete_session(self, session_id: str) -> bool:
+        """Удаление сессии пользователя"""
+        return await self.delete_cache(f"session:{session_id}")
+    
+    async def increment_counter(self, key: str, expire: int = 60) -> int:
+        """Инкремент счетчика для rate limiting"""
+        if not self.redis:
+            return 0
         
         try:
-            info = self.redis_client.info()
-            return {
-                "connected_clients": info.get("connected_clients", 0),
-                "used_memory_human": info.get("used_memory_human", "N/A"),
-                "total_commands_processed": info.get("total_commands_processed", 0),
-                "keyspace_hits": info.get("keyspace_hits", 0),
-                "keyspace_misses": info.get("keyspace_misses", 0)
-            }
+            pipe = self.redis.pipeline()
+            pipe.incr(key)
+            pipe.expire(key, expire)
+            result = await pipe.execute()
+            return result[0]
         except Exception as e:
-            logger.error(f"Ошибка при получении статистики Redis: {e}")
-            return {"error": str(e)}
+            logger.error(f"❌ Ошибка инкремента счетчика: {e}")
+            return 0
+    
+    async def get_counter(self, key: str) -> int:
+        """Получение значения счетчика"""
+        if not self.redis:
+            return 0
+        
+        try:
+            value = await self.redis.get(key)
+            return int(value) if value else 0
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения счетчика: {e}")
+            return 0
+    
+    async def health_check(self) -> bool:
+        """Проверка здоровья Redis"""
+        if not self.redis:
+            return False
+        
+        try:
+            await self.redis.ping()
+            return True
+        except Exception:
+            return False
 
 # Глобальный экземпляр Redis сервиса
 redis_service = RedisService() 

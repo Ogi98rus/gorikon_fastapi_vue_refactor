@@ -5,6 +5,9 @@ from fastapi.openapi.utils import get_openapi
 import logging
 import sys
 from pathlib import Path
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+import time
+from datetime import datetime
 
 # Добавляем путь к app в sys.path
 app_dir = Path(__file__).parent
@@ -13,6 +16,8 @@ sys.path.insert(0, str(app_dir))
 # Импорты приложения
 from app.core.config import settings
 from app.middleware.i18n import I18nMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
+from app.services.redis_service import redis_service
 
 # Импорт роутеров
 from app.routers import i18n, math, ktp, math_game
@@ -24,6 +29,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Prometheus метрики
+REQUEST_COUNT = Counter('http_requests_total', 'Total HTTP requests', ['method', 'endpoint', 'status'])
+REQUEST_DURATION = Histogram('http_request_duration_seconds', 'HTTP request duration')
 
 # Создание FastAPI приложения
 app = FastAPI(
@@ -51,6 +60,8 @@ app = FastAPI(
     - Автоматическая генерация документации
     - Обработка ошибок и логирование
     - Модульная архитектура для легкого расширения
+    - Redis кеширование и rate limiting
+    - Prometheus метрики для мониторинга
     """,
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
@@ -60,6 +71,9 @@ app = FastAPI(
 # Добавляем middleware (порядок важен! Последний добавленный выполняется первым)
 # Добавляем i18n middleware
 app.add_middleware(I18nMiddleware)
+
+# Добавляем rate limiting middleware
+app.add_middleware(RateLimitMiddleware)
 
 # CORS должен быть добавлен ПОСЛЕДНИМ, чтобы выполняться ПЕРВЫМ!
 app.add_middleware(
@@ -84,6 +98,66 @@ app.include_router(ktp.router)       # КТП генератор
 app.include_router(math_game.router) # Математическая игра
 app.include_router(math.legacy_router)  # Legacy математический генератор
 app.include_router(ktp.legacy_router)   # Legacy КТП генератор
+
+# События жизненного цикла приложения
+@app.on_event("startup")
+async def startup_event():
+    """Событие запуска приложения"""
+    logger.info("🚀 Запуск приложения...")
+    
+    # Подключаемся к Redis
+    await redis_service.connect()
+    
+    logger.info("✅ Приложение запущено успешно")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Событие остановки приложения"""
+    logger.info("🛑 Остановка приложения...")
+    
+    # Отключаемся от Redis
+    await redis_service.disconnect()
+    
+    logger.info("✅ Приложение остановлено")
+
+# Middleware для сбора метрик
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    """Middleware для сбора метрик Prometheus"""
+    start_time = time.time()
+    
+    response = await call_next(request)
+    
+    # Записываем метрики
+    duration = time.time() - start_time
+    REQUEST_DURATION.observe(duration)
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=request.url.path,
+        status=response.status_code
+    ).inc()
+    
+    return response
+
+# Эндпоинт для метрик Prometheus
+@app.get("/metrics")
+async def metrics():
+    """Эндпоинт для метрик Prometheus"""
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# Эндпоинт для проверки здоровья
+@app.get("/health")
+async def health_check():
+    """Проверка здоровья приложения"""
+    redis_health = await redis_service.health_check()
+    
+    return {
+        "status": "healthy" if redis_health else "degraded",
+        "timestamp": datetime.utcnow().isoformat(),
+        "services": {
+            "redis": "healthy" if redis_health else "unhealthy"
+        }
+    }
 
 # Обработчики ошибок
 @app.exception_handler(HTTPException)
@@ -157,24 +231,6 @@ async def root():
         ]
     }
 
-@app.get("/health", tags=["Система"])
-async def health_check():
-    """Проверка состояния приложения"""
-    return {
-        "status": "healthy",
-        "version": settings.app_version,
-        "components": {
-            "i18n": "multilingual",
-            "generators": "ready"
-        },
-        "config": {
-            "debug": settings.debug,
-            "max_operands": settings.max_operands,
-            "max_examples": settings.max_examples,
-            "max_lessons_per_day": settings.max_lessons_per_day
-        }
-    }
-
 @app.get("/api/info", tags=["API"])
 async def api_info():
     """Информация об API"""
@@ -198,23 +254,6 @@ async def api_info():
             "ktp": "/api/ktp/ktp-generator"
         }
     }
-
-# Событие запуска
-@app.on_event("startup")
-async def startup_event():
-    """Действия при запуске приложения"""
-    logger.info(f"🚀 Запуск {settings.app_name} v{settings.app_version}")
-    logger.info(f"🔧 Режим отладки: {settings.debug}")
-    logger.info(f"📁 Временная папка: {settings.temp_dir}")
-    
-    logger.info(f"⚙️ Настройки загружены из .env")
-    logger.info(f"🎯 Доступные функции: генераторы примеров и КТП")
-
-# Событие остановки  
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Действия при остановке приложения"""
-    logger.info(f"🛑 Остановка {settings.app_name}")
 
 # Кастомизация OpenAPI схемы
 def custom_openapi():

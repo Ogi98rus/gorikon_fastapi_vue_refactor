@@ -13,7 +13,129 @@ providers:
     exposedByDefault: false
     network: traefik
 
+# Расширенное логирование
 log:
   level: INFO
+  filePath: "/var/log/traefik.log"
 
-accessLog: {}
+# Access logs с детальной информацией
+accessLog:
+  filePath: "/var/log/access.log"
+  format: json
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: keep
+    names:
+      ClientUsername: keep
+      ClientHost: keep
+      ClientPort: keep
+      ClientAddr: keep
+      ClientIP: keep
+      ClientHostname: keep
+      DownstreamStatus: keep
+      DownstreamStatusLine: keep
+      DownstreamStatusCode: keep
+      DownstreamHeader: keep
+      DownstreamResponseTime: keep
+      DownstreamResponseTimeMS: keep
+      DownstreamContentSize: keep
+      DownstreamContentSizeNoChunked: keep
+      DownstreamChunkedResponse: keep
+      DownstreamConnectionLimit: keep
+      DownstreamConnectionCount: keep
+      DownstreamAdd: keep
+      DownstreamPort: keep
+      DownstreamIP: keep
+      DownstreamHost: keep
+      DownstreamHostname: keep
+      RequestAddr: keep
+      RequestHost: keep
+      RequestMethod: keep
+      RequestPath: keep
+      RequestPort: keep
+      RequestProtocol: keep
+      RequestScheme: keep
+      RequestURL: keep
+      RequestLine: keep
+      RequestContentSize: keep
+      RequestContentSizeNoChunked: keep
+      RequestChunked: keep
+      RequestHeader: keep
+      RequestTrailer: keep
+      ResponseHeader: keep
+      ResponseTrailer: keep
+      ResponseStatus: keep
+      ResponseStatusLine: keep
+      ResponseStatusCode: keep
+      ResponseContentSize: keep
+      ResponseContentSizeNoChunked: keep
+      ResponseChunked: keep
+      Duration: keep
+      DurationMS: keep
+      Overhead: keep
+      OverheadMS: keep
+      RetryAttempts: keep
+      StartUTC: keep
+      StartLocal: keep
+      EndUTC: keep
+      EndLocal: keep
+      OriginStatus: keep
+      OriginStatusLine: keep
+      OriginStatusCode: keep
+      OriginContentSize: keep
+      OriginContentSizeNoChunked: keep
+      OriginChunked: keep
+      OriginHeader: keep
+      OriginTrailer: keep
+      OriginDuration: keep
+      OriginDurationMS: keep
+      OriginOverhead: keep
+      OriginOverheadMS: keep
+      OriginRetryAttempts: keep
+      OriginStartUTC: keep
+      OriginStartLocal: keep
+      OriginEndUTC: keep
+      OriginEndLocal: keep
+      RouterName: keep
+      ServiceName: keep
+      ServiceAddr: keep
+      ServicePort: keep
+      ServiceHost: keep
+      ServiceHostname: keep
+      ServiceIP: keep
+      ServiceAdd: keep
+      ServiceConnectionCount: keep
+      ServiceConnectionLimit: keep
+      ServiceChunkedResponse: keep
+      ServiceContentSize: keep
+      ServiceContentSizeNoChunked: keep
+      ServiceResponseTime: keep
+      ServiceResponseTimeMS: keep
+      ServiceHeader: keep
+      ServiceTrailer: keep
+      ServiceStatus: keep
+      ServiceStatusLine: keep
+      ServiceStatusCode: keep
+      ServiceRetryAttempts: keep
+      ServiceStartUTC: keep
+      ServiceStartLocal: keep
+      ServiceEndUTC: keep
+      ServiceEndLocal: keep
+      ServiceDuration: keep
+      ServiceDurationMS: keep
+      ServiceOverhead: keep
+      ServiceOverheadMS: keep
+
+# Метрики для Prometheus
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+    buckets: [0.1,0.3,1.2,5.0]
+
+# Трассировка
+tracing:
+  serviceName: traefik
+  spanNameLimit: 0

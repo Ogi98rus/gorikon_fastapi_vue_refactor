@@ -14,31 +14,49 @@ services:
       - traefik
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: generator-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - traefik
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   backend:
     build: ./backend
     container_name: generator-backend
-    # Убираем прямые порты, используем Traefik
-    # ports:
-    #   - "8000:8000"
     environment:
       - DEBUG=true
+      - REDIS_URL=redis://redis:6379
+      - MAX_WORKERS=4
+      - WORKER_CONNECTIONS=1000
     volumes:
       - ./generated_files:/app/generated_files
     networks:
       - traefik
     restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`gorikon.ru`) && PathPrefix(`/api/`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.middlewares.backend-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.backend-ratelimit.ratelimit.burst=200"
+      - "traefik.http.routers.backend.middlewares=backend-ratelimit"
 
   frontend:
     build: ./frontend
     container_name: generator-frontend
-    # Убираем прямые порты, используем Traefik
-    # ports:
-    #   - "8080:80"
     networks:
       - traefik
     restart: unless-stopped
@@ -49,6 +67,47 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`gorikon.ru`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.entrypoints=web"
+
+  # Мониторинг
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: generator-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - traefik
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: generator-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - traefik
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   traefik:
