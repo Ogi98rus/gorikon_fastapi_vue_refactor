@@ -95,11 +95,12 @@ class RedisService:
             return 0
         
         try:
-            pipe = self.redis.pipeline()
-            pipe.incr(key)
-            pipe.expire(key, expire)
-            result = await pipe.execute()
-            return result[0]
+            # Используем pipeline для атомарности операций
+            async with self.redis.pipeline() as pipe:
+                await pipe.incr(key)
+                await pipe.expire(key, expire)
+                result = await pipe.execute()
+                return result[0]
         except Exception as e:
             logger.error(f"❌ Ошибка инкремента счетчика: {e}")
             return 0

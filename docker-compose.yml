@@ -50,9 +50,6 @@ services:
       - "traefik.http.routers.backend.rule=Host(`gorikon.ru`) && PathPrefix(`/api/`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.middlewares.backend-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.backend-ratelimit.ratelimit.burst=200"
-      - "traefik.http.routers.backend.middlewares=backend-ratelimit"
 
   frontend:
     build: ./frontend
