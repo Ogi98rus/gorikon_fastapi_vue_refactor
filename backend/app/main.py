@@ -106,7 +106,7 @@ async def startup_event():
     logger.info("🚀 Запуск приложения...")
     
     # Подключаемся к Redis
-    await redis_service.connect()
+    redis_service.connect()
     
     logger.info("✅ Приложение запущено успешно")
 
@@ -116,7 +116,7 @@ async def shutdown_event():
     logger.info("🛑 Остановка приложения...")
     
     # Отключаемся от Redis
-    await redis_service.disconnect()
+    redis_service.disconnect()
     
     logger.info("✅ Приложение остановлено")
 
@@ -149,7 +149,7 @@ async def metrics():
 @app.get("/health")
 async def health_check():
     """Проверка здоровья приложения"""
-    redis_health = await redis_service.health_check()
+    redis_health = redis_service.health_check()
     
     return {
         "status": "healthy" if redis_health else "degraded",

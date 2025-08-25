@@ -198,6 +198,14 @@ docker-compose logs -f traefik
 - [ ] Kubernetes развертывание
 - [ ] Глобальное распределение
 
+
+Доступные порты:
+Frontend: http://localhost (через Traefik)
+Backend API: http://localhost/api/
+Traefik Dashboard: http://localhost:8080
+Prometheus: http://localhost:9090
+Grafana: http://localhost:3000
+
 ## 📚 Полезные ссылки
 
 - [FastAPI документация](https://fastapi.tiangolo.com/)

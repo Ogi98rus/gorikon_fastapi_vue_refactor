@@ -23,7 +23,7 @@ class RateLimitMiddleware:
         
         try:
             # Проверяем текущий счетчик
-            current_count = await redis_service.get_counter(rate_limit_key)
+            current_count = redis_service.get_counter(rate_limit_key)
             
             if current_count >= self.requests_per_minute:
                 # Превышен лимит запросов
@@ -40,7 +40,7 @@ class RateLimitMiddleware:
                 )
             
             # Увеличиваем счетчик
-            await redis_service.increment_counter(rate_limit_key, expire=60)
+            redis_service.increment_counter(rate_limit_key, expire=60)
             
             # Добавляем заголовки с информацией о rate limit
             response = await call_next(request)
